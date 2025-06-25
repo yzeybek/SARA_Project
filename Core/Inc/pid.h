@@ -24,7 +24,7 @@ typedef struct s_pid
 
 }	t_pid;
 
-void	pid_init(t_pid *pid, float Kp, float Ki, float Kd, float out_min, float out_max, float int_min, float int_max);
+void	pid_init(t_pid *pid, float pid_values[7]);
 float	pid_update(t_pid *pid, float error, float dt);
 
 #endif /* INC_PID_H_ */

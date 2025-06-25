@@ -1,28 +1,31 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 #include "pid.h"
 #include "sara.h"
+#include "state.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +47,13 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+
 t_pid pid_heave, pid_sway, pid_surge, pid_roll, pid_pitch, pid_yaw;
+float pid_values[7];
+
+t_state states[8];
+float state_ranges[9];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,171 +70,362 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
+ * @brief  The application entry point.
+ * @retval int
+ */
+int main(void) {
 
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+	/* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE BEGIN Init */
-  pid_init(&pid_heave, PID_HEAVE_KP, PID_HEAVE_KI, PID_HEAVE_KD, PID_HEAVE_OUT_MIN, PID_HEAVE_OUT_MAX, PID_HEAVE_INT_MIN, PID_HEAVE_INT_MAX);
-  pid_init(&pid_sway, PID_SWAY_KP, PID_SWAY_KI, PID_SWAY_KD, PID_SWAY_OUT_MIN, PID_SWAY_OUT_MAX, PID_SWAY_INT_MIN, PID_SWAY_INT_MAX)
-  pid_init(&pid_surge, PID_SURGE_KP, PID_SURGE_KI, PID_SURGE_KD, PID_SURGE_OUT_MIN, PID_SURGE_OUT_MAX, PID_SURGE_INT_MIN, PID_SURGE_INT_MAX);
-  pid_init(&pid_roll, PID_ROLL_KP, PID_ROLL_KI, PID_ROLL_KD, PID_ROLL_OUT_MIN, PID_ROLL_OUT_MAX, PID_ROLL_INT_MIN, PID_ROLL_INT_MAX);
-  pid_init(&pid_pitch, PID_PITCH_KP, PID_PITCH_KI, PID_PITCH_KD, PID_PITCH_OUT_MIN, PID_PITCH_OUT_MAX, PID_PITCH_INT_MIN, PID_PITCH_INT_MAX);
-  pid_init(&pid_yaw, PID_YAW_KP, PID_YAW_KI, PID_YAW_KD, PID_YAW_OUT_MIN, PID_YAW_OUT_MAX, PID_YAW_INT_MIN, PID_YAW_INT_MAX);
-  /* USER CODE END Init */
+	/* USER CODE BEGIN Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* PID Init Begin */
 
-  /* USER CODE BEGIN SysInit */
+	pid_values[0] = PID_HEAVE_KP;
+	pid_values[1] = PID_HEAVE_KI;
+	pid_values[2] = PID_HEAVE_KD;
+	pid_values[3] = PID_HEAVE_OUT_MIN;
+	pid_values[4] = PID_HEAVE_OUT_MAX;
+	pid_values[5] = PID_HEAVE_INT_MIN;
+	pid_values[6] = PID_HEAVE_INT_MAX;
+	pid_init(&pid_heave, pid_values);
 
-  /* USER CODE END SysInit */
+	pid_values[0] = PID_SWAY_KP;
+	pid_values[1] = PID_SWAY_KI;
+	pid_values[2] = PID_SWAY_KD;
+	pid_values[3] = PID_SWAY_OUT_MIN;
+	pid_values[4] = PID_SWAY_OUT_MAX;
+	pid_values[5] = PID_SWAY_INT_MIN;
+	pid_values[6] = PID_SWAY_INT_MAX;
+	pid_init(&pid_sway, pid_values);
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
+	pid_values[0] = PID_SURGE_KP;
+	pid_values[1] = PID_SURGE_KI;
+	pid_values[2] = PID_SURGE_KD;
+	pid_values[3] = PID_SURGE_OUT_MIN;
+	pid_values[4] = PID_SURGE_OUT_MAX;
+	pid_values[5] = PID_SURGE_INT_MIN;
+	pid_values[6] = PID_SURGE_INT_MAX;
+	pid_init(&pid_surge, pid_values);
 
-  /* USER CODE END 2 */
+	pid_values[0] = PID_ROLL_KP;
+	pid_values[1] = PID_ROLL_KI;
+	pid_values[2] = PID_ROLL_KD;
+	pid_values[3] = PID_ROLL_OUT_MIN;
+	pid_values[4] = PID_ROLL_OUT_MAX;
+	pid_values[5] = PID_ROLL_INT_MIN;
+	pid_values[6] = PID_ROLL_INT_MAX;
+	pid_init(&pid_roll, pid_values);
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
+	pid_values[0] = PID_PITCH_KP;
+	pid_values[1] = PID_PITCH_KI;
+	pid_values[2] = PID_PITCH_KD;
+	pid_values[3] = PID_PITCH_OUT_MIN;
+	pid_values[4] = PID_PITCH_OUT_MAX;
+	pid_values[5] = PID_PITCH_INT_MIN;
+	pid_values[6] = PID_PITCH_INT_MAX;
+	pid_init(&pid_pitch, pid_values);
 
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+	pid_values[0] = PID_YAW_KP;
+	pid_values[1] = PID_YAW_KI;
+	pid_values[2] = PID_YAW_KD;
+	pid_values[3] = PID_YAW_OUT_MIN;
+	pid_values[4] = PID_YAW_OUT_MAX;
+	pid_values[5] = PID_YAW_INT_MIN;
+	pid_values[6] = PID_YAW_INT_MAX;
+	pid_init(&pid_yaw, pid_values);
+
+	/* PID Init End */
+
+	/* State Init Begin */
+
+	state_ranges[0].start = STATE_1_POS_X_START;
+	state_ranges[0].end = STATE_1_POS_X_END;
+	state_ranges[1].start = STATE_1_POS_Y_START;
+	state_ranges[1].end = STATE_1_POS_Y_END;
+	state_ranges[2].start = STATE_1_POS_Z_START;
+	state_ranges[2].end = STATE_1_POS_Z_END;
+	state_ranges[3].start = STATE_1_VEL_X_START;
+	state_ranges[3].end = STATE_1_VEL_X_END;
+	state_ranges[4].start = STATE_1_VEL_Y_START;
+	state_ranges[4].end = STATE_1_VEL_Y_END;
+	state_ranges[5].start = STATE_1_VEL_Z_START;
+	state_ranges[5].end = STATE_1_VEL_Z_END;
+	state_ranges[6].start = STATE_1_EUL_X_START;
+	state_ranges[6].end = STATE_1_EUL_X_END;
+	state_ranges[7].start = STATE_1_EUL_Y_START;
+	state_ranges[7].end = STATE_1_EUL_Y_END;
+	state_ranges[8].start = STATE_1_EUL_Z_START;
+	state_ranges[8].end = STATE_1_EUL_Z_END;
+	state_init(&states[0], state_ranges);
+
+	state_ranges[0].start = STATE_2_POS_X_START;
+	state_ranges[0].end = STATE_2_POS_X_END;
+	state_ranges[1].start = STATE_2_POS_Y_START;
+	state_ranges[1].end = STATE_2_POS_Y_END;
+	state_ranges[2].start = STATE_2_POS_Z_START;
+	state_ranges[2].end = STATE_2_POS_Z_END;
+	state_ranges[3].start = STATE_2_VEL_X_START;
+	state_ranges[3].end = STATE_2_VEL_X_END;
+	state_ranges[4].start = STATE_2_VEL_Y_START;
+	state_ranges[4].end = STATE_2_VEL_Y_END;
+	state_ranges[5].start = STATE_2_VEL_Z_START;
+	state_ranges[5].end = STATE_2_VEL_Z_END;
+	state_ranges[6].start = STATE_2_EUL_X_START;
+	state_ranges[6].end = STATE_2_EUL_X_END;
+	state_ranges[7].start = STATE_2_EUL_Y_START;
+	state_ranges[7].end = STATE_2_EUL_Y_END;
+	state_ranges[8].start = STATE_2_EUL_Z_START;
+	state_ranges[8].end = STATE_2_EUL_Z_END;
+	state_init(&states[1], state_ranges);
+
+	state_ranges[0].start = STATE_3_POS_X_START;
+	state_ranges[0].end = STATE_3_POS_X_END;
+	state_ranges[1].start = STATE_3_POS_Y_START;
+	state_ranges[1].end = STATE_3_POS_Y_END;
+	state_ranges[2].start = STATE_3_POS_Z_START;
+	state_ranges[2].end = STATE_3_POS_Z_END;
+	state_ranges[3].start = STATE_3_VEL_X_START;
+	state_ranges[3].end = STATE_3_VEL_X_END;
+	state_ranges[4].start = STATE_3_VEL_Y_START;
+	state_ranges[4].end = STATE_3_VEL_Y_END;
+	state_ranges[5].start = STATE_3_VEL_Z_START;
+	state_ranges[5].end = STATE_3_VEL_Z_END;
+	state_ranges[6].start = STATE_3_EUL_X_START;
+	state_ranges[6].end = STATE_3_EUL_X_END;
+	state_ranges[7].start = STATE_3_EUL_Y_START;
+	state_ranges[7].end = STATE_3_EUL_Y_END;
+	state_ranges[8].start = STATE_3_EUL_Z_START;
+	state_ranges[8].end = STATE_3_EUL_Z_END;
+	state_init(&states[2], state_ranges);
+
+	state_ranges[0].start = STATE_4_POS_X_START;
+	state_ranges[0].end = STATE_4_POS_X_END;
+	state_ranges[1].start = STATE_4_POS_Y_START;
+	state_ranges[1].end = STATE_4_POS_Y_END;
+	state_ranges[2].start = STATE_4_POS_Z_START;
+	state_ranges[2].end = STATE_4_POS_Z_END;
+	state_ranges[3].start = STATE_4_VEL_X_START;
+	state_ranges[3].end = STATE_4_VEL_X_END;
+	state_ranges[4].start = STATE_4_VEL_Y_START;
+	state_ranges[4].end = STATE_4_VEL_Y_END;
+	state_ranges[5].start = STATE_4_VEL_Z_START;
+	state_ranges[5].end = STATE_4_VEL_Z_END;
+	state_ranges[6].start = STATE_4_EUL_X_START;
+	state_ranges[6].end = STATE_4_EUL_X_END;
+	state_ranges[7].start = STATE_4_EUL_Y_START;
+	state_ranges[7].end = STATE_4_EUL_Y_END;
+	state_ranges[8].start = STATE_4_EUL_Z_START;
+	state_ranges[8].end = STATE_4_EUL_Z_END;
+	state_init(&states[3], state_ranges);
+
+	state_ranges[0].start = STATE_5_POS_X_START;
+	state_ranges[0].end = STATE_5_POS_X_END;
+	state_ranges[1].start = STATE_5_POS_Y_START;
+	state_ranges[1].end = STATE_5_POS_Y_END;
+	state_ranges[2].start = STATE_5_POS_Z_START;
+	state_ranges[2].end = STATE_5_POS_Z_END;
+	state_ranges[3].start = STATE_5_VEL_X_START;
+	state_ranges[3].end = STATE_5_VEL_X_END;
+	state_ranges[4].start = STATE_5_VEL_Y_START;
+	state_ranges[4].end = STATE_5_VEL_Y_END;
+	state_ranges[5].start = STATE_5_VEL_Z_START;
+	state_ranges[5].end = STATE_5_VEL_Z_END;
+	state_ranges[6].start = STATE_5_EUL_X_START;
+	state_ranges[6].end = STATE_5_EUL_X_END;
+	state_ranges[7].start = STATE_5_EUL_Y_START;
+	state_ranges[7].end = STATE_5_EUL_Y_END;
+	state_ranges[8].start = STATE_5_EUL_Z_START;
+	state_ranges[8].end = STATE_5_EUL_Z_END;
+	state_init(&states[4], state_ranges);
+
+	state_ranges[0].start = STATE_6_POS_X_START;
+	state_ranges[0].end = STATE_6_POS_X_END;
+	state_ranges[1].start = STATE_6_POS_Y_START;
+	state_ranges[1].end = STATE_6_POS_Y_END;
+	state_ranges[2].start = STATE_6_POS_Z_START;
+	state_ranges[2].end = STATE_6_POS_Z_END;
+	state_ranges[3].start = STATE_6_VEL_X_START;
+	state_ranges[3].end = STATE_6_VEL_X_END;
+	state_ranges[4].start = STATE_6_VEL_Y_START;
+	state_ranges[4].end = STATE_6_VEL_Y_END;
+	state_ranges[5].start = STATE_6_VEL_Z_START;
+	state_ranges[5].end = STATE_6_VEL_Z_END;
+	state_ranges[6].start = STATE_6_EUL_X_START;
+	state_ranges[6].end = STATE_6_EUL_X_END;
+	state_ranges[7].start = STATE_6_EUL_Y_START;
+	state_ranges[7].end = STATE_6_EUL_Y_END;
+	state_ranges[8].start = STATE_6_EUL_Z_START;
+	state_ranges[8].end = STATE_6_EUL_Z_END;
+	state_init(&states[5], state_ranges);
+
+	state_ranges[0].start = STATE_7_POS_X_START;
+	state_ranges[0].end = STATE_7_POS_X_END;
+	state_ranges[1].start = STATE_7_POS_Y_START;
+	state_ranges[1].end = STATE_7_POS_Y_END;
+	state_ranges[2].start = STATE_7_POS_Z_START;
+	state_ranges[2].end = STATE_7_POS_Z_END;
+	state_ranges[3].start = STATE_7_VEL_X_START;
+	state_ranges[3].end = STATE_7_VEL_X_END;
+	state_ranges[4].start = STATE_7_VEL_Y_START;
+	state_ranges[4].end = STATE_7_VEL_Y_END;
+	state_ranges[5].start = STATE_7_VEL_Z_START;
+	state_ranges[5].end = STATE_7_VEL_Z_END;
+	state_ranges[6].start = STATE_7_EUL_X_START;
+	state_ranges[6].end = STATE_7_EUL_X_END;
+	state_ranges[7].start = STATE_7_EUL_Y_START;
+	state_ranges[7].end = STATE_7_EUL_Y_END;
+	state_ranges[8].start = STATE_7_EUL_Z_START;
+	state_ranges[8].end = STATE_7_EUL_Z_END;
+	state_init(&states[6], state_ranges);
+
+	states[7] = NULL;
+
+	/* State Init End */
+
+	/* USER CODE END Init */
+
+	/* Configure the system clock */
+	SystemClock_Config();
+
+	/* USER CODE BEGIN SysInit */
+
+	/* USER CODE END SysInit */
+
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_USART2_UART_Init();
+	/* USER CODE BEGIN 2 */
+
+	/* USER CODE END 2 */
+
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	while (1) {
+		/* USER CODE END WHILE */
+
+		/* USER CODE BEGIN 3 */
+	}
+	/* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+ * @brief System Clock Configuration
+ * @retval None
+ */
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+	/** Configure the main internal regulator output voltage
+	 */
+	__HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 16;
-  RCC_OscInitStruct.PLL.PLLN = 336;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	RCC_OscInitStruct.PLL.PLLM = 16;
+	RCC_OscInitStruct.PLL.PLLN = 336;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+	RCC_OscInitStruct.PLL.PLLQ = 7;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+		Error_Handler();
+	}
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART2_UART_Init(void) {
 
-  /* USER CODE BEGIN USART2_Init 0 */
+	/* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END USART2_Init 0 */
+	/* USER CODE END USART2_Init 0 */
 
-  /* USER CODE BEGIN USART2_Init 1 */
+	/* USER CODE BEGIN USART2_Init 1 */
 
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
+	/* USER CODE END USART2_Init 1 */
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 115200;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart2) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART2_Init 2 */
 
-  /* USER CODE END USART2_Init 2 */
+	/* USER CODE END USART2_Init 2 */
 
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* USER CODE BEGIN MX_GPIO_Init_1 */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_GPIO_Init(void) {
+	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	/* USER CODE BEGIN MX_GPIO_Init_1 */
 
-  /* USER CODE END MX_GPIO_Init_1 */
+	/* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+	/*Configure GPIO pin : B1_Pin */
+	GPIO_InitStruct.Pin = B1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+	/*Configure GPIO pin : LD2_Pin */
+	GPIO_InitStruct.Pin = LD2_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
+	/* USER CODE BEGIN MX_GPIO_Init_2 */
 
-  /* USER CODE END MX_GPIO_Init_2 */
+	/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -233,18 +433,16 @@ static void MX_GPIO_Init(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+void Error_Handler(void) {
+	/* USER CODE BEGIN Error_Handler_Debug */
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
+	/* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT

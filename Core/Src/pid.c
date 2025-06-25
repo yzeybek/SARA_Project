@@ -7,15 +7,15 @@
 
 #include "pid.h"
 
-void pid_init(t_pid *pid, float Kp, float Ki, float Kd, float out_min, float out_max, float int_min, float int_max)
+void pid_init(t_pid *pid, float pid_values[7])
 {
-    pid->Kp = Kp;
-    pid->Ki = Ki;
-    pid->Kd = Kd;
-    pid->out_min = out_min;
-    pid->out_max = out_max;
-    pid->int_min = int_min;
-    pid->int_max = int_max;
+    pid->Kp = values[0];
+    pid->Ki = values[1];
+    pid->Kd = values[2];
+    pid->out_min = values[3];
+    pid->out_max = values[4];
+    pid->int_min = values[5];
+    pid->int_max = values[6];
     pid->integrator = 0.0f;
     pid->prev_error = FLT_MAX;
 }
