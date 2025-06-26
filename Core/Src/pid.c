@@ -9,13 +9,13 @@
 
 void pid_init(t_pid *pid, float pid_values[7])
 {
-    pid->Kp = values[0];
-    pid->Ki = values[1];
-    pid->Kd = values[2];
-    pid->out_min = values[3];
-    pid->out_max = values[4];
-    pid->int_min = values[5];
-    pid->int_max = values[6];
+    pid->Kp = pid_values[0];
+    pid->Ki = pid_values[1];
+    pid->Kd = pid_values[2];
+    pid->out_min = pid_values[3];
+    pid->out_max = pid_values[4];
+    pid->int_min = pid_values[5];
+    pid->int_max = pid_values[6];
     pid->integrator = 0.0f;
     pid->prev_error = FLT_MAX;
 }

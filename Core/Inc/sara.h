@@ -8,7 +8,7 @@
 #ifndef INC_SARA_H_
 #define INC_SARA_H_
 
-/* PID Coefficients Begin */
+// PID Coefficients Begin
 
 # define PID_HEAVE_KP 1.0f
 # define PID_HEAVE_KI 1.0f
@@ -58,9 +58,9 @@
 # define PID_YAW_INT_MIN 1.0f
 # define PID_YAW_INT_MAX 1.0f
 
-/* PID Coefficients End */
+// PID Coefficients End
 
-/* State Ranges Begin */
+// State Ranges Begin
 
 # define STATE_1_POS_X_START 1.0f
 # define STATE_1_POS_X_END 1.0f
@@ -129,7 +129,7 @@
 # define STATE_4_VEL_X_END 1.0f
 # define STATE_4_VEL_Y_START 1.0f
 # define STATE_4_VEL_Y_END 1.0f
-# define STATE_2_VEL_Z_START 1.0f
+# define STATE_4_VEL_Z_START 1.0f
 # define STATE_4_VEL_Z_END 1.0f
 # define STATE_4_EUL_X_START 1.0f
 # define STATE_4_EUL_X_END 1.0f
@@ -195,7 +195,7 @@
 # define STATE_7_EUL_Z_START 1.0f
 # define STATE_7_EUL_Z_END 1.0f
 
-/* State Ranges End */
+// State Ranges End
 
 
 #endif /* INC_SARA_H_ */

@@ -8,7 +8,9 @@
 #ifndef INC_STATE_H_
 #define INC_STATE_H_
 
-#include <stdbool.h>
+#include "stdbool.h"
+#include "stddef.h"
+#include "stdint.h"
 
 typedef struct s_range
 {
