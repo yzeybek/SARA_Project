@@ -8,7 +8,7 @@
 #ifndef SARA_INC_SEN0257_H_
 #define SARA_INC_SEN0257_H_
 
-# include "../../STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h"
+# include "stm32f4xx_hal.h"
 
 # define SEN0257_OFFSET 0.483f
 # define SEN0257_INPUT_VOLTAGE 5.0f

@@ -11,24 +11,29 @@
 # include "stdbool.h"
 # include "stm32f4xx.h"
 
-# define BNO055_ANY_TIME_DELAY 19
-
+# define BNO055_CHIP_ID (0x00)
+# define BNO055_DEF_CHIP_ID (0xA0)
 # define BNO055_SYS_TRIGGER (0x3F)
 
-# define BNO055_PAGE_ID (0x07)
+# define BNO055_ANY_TIME_DELAY 19
+# define BNO055_MINI_TIME_DELAY 2
+# define BNO055_CONFIG_TIME_DELAY 7
 
+# define BNO055_PAGE_ID (0x07)
 # define BNO055_OPR_MODE (0x3D)
 # define BNO055_PWR_MODE (0x3E)
 
 # define BNO055_UNIT_SEL (0x3B)
-
 # define BNO055_GYRO_UNITSEL_OFFSET (0x01)
 # define BNO055_EUL_UNITSEL_OFFSET (0x02)
 
-# define BNO055_EUL_HEADING_LSB (0x1A)
+# define BNO055_LIA_DATA_X_LSB (0x28)
+# define BNO055_ACCEL_SCALE_M_2 100.0f
+# define BNO055_ACCEL_SCALE_MG  1.0f
 
-# define BNO055_EUL_SCALE_DEG 16.0f
-# define BNO055_EUL_SCALE_RAD 900.0f
+# define BNO055_GYRO_DATA_X_LSB (0x14)
+# define BNO055_GYRO_SCALE_DPS 16.0f
+# define BNO055_GYRO_SCALE_RPS 900.0f
 
 typedef enum e_bno055_err
 {
@@ -37,8 +42,8 @@ typedef enum e_bno055_err
     BNO055_ERR_PAGE_TOO_HIGH,
     BNO055_ERR_SETTING_PAGE,
     BNO055_ERR_NULL_PTR,
-    BNO55_ERR_AXIS_REMAP,
-    BNO55_ERR_WRONG_CHIP_ID,
+    BNO055_ERR_AXIS_REMAP,
+    BNO055_ERR_WRONG_CHIP_ID,
 
 }	t_bno055_err;
 
@@ -105,27 +110,31 @@ typedef struct s_bno055
     t_bno055_opr_mode		opr_mode;
     t_bno055_pwr_mode		pwr_mode;
     t_bno055_page			page;
-    t_bno055_acc_unitsel	acc_unit;
-    t_bno055_gyr_unitsel	gyr_unit;
+    t_bno055_accel_unitsel	accel_unit;
+    t_bno055_gyro_unitsel	gyro_unit;
     t_bno055_eul_unitsel	eul_unit;
-    bno055_acc_range_t _acc_range;
-    bno055_acc_band_t _acc_bandwidth;
-    bno055_acc_mode_t _acc_mode;
-    bno055_gyr_range_t _gyr_range;
-    bno055_gyr_band_t _gyr_bandwith;
-    bno055_gyr_mode_t _gyr_mode;
-    bno055_mag_rate_t _mag_out_rate;
-    bno055_mag_mode_t _mag_mode;
-    bno055_mag_pwr_t _mag_pwr_mode;
 
 }	t_bno055;
 
-typedef struct s_bno055_euler
+typedef struct s_bno055_vec
 {
-    float	roll;
-    float	pitch;
-    float	yaw;
+    float	x;
+    float	y;
+    float	z;
 
-}	t_bno055_euler;
+}	t_bno055_vec;
+
+t_bno055_err	bno055_init(t_bno055 *bno055);
+t_bno055_err	bno055_reset(t_bno055 *bno055);
+t_bno055_err	bno055_on(t_bno055 *bno055);
+t_bno055_err	bno055_linear_acc(t_bno055 *bno055, t_bno055_vec *xyz);
+t_bno055_err	bno055_gyro(t_bno055 *bno055, t_bno055_vec *xyz);
+t_bno055_err	bno055_read_regs(t_bno055 bno055, uint8_t addr, uint8_t* buf, uint32_t buf_size);
+t_bno055_err	bno055_write_regs(t_bno055 bno055, uint32_t addr, uint8_t* buf, uint32_t buf_size);
+t_bno055_err	bno055_set_opr_mode(t_bno055* bno055, const t_bno055_opr_mode opr_mode);
+t_bno055_err	bno055_set_pwr_mode(t_bno055 *bno055, t_bno055_pwr_mode pwr_mode);
+t_bno055_err	bno055_set_page(t_bno055* bno055, const t_bno055_page page);
+t_bno055_err	bno055_set_unit(t_bno055* bno055, const t_bno055_gyro_unitsel gyro_unit, const t_bno055_accel_unitsel accel_unit, const t_bno055_eul_unitsel eul_unit);
+char			*bno055_err_str(const t_bno055_err err);
 
 #endif /* SARA_INC_BNO055_H_ */

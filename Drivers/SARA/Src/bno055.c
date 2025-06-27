@@ -21,7 +21,7 @@ t_bno055_err	bno055_init(t_bno055 *bno055)
         return (BNO055_ERR_WRONG_CHIP_ID);
     if ((err = bno055_set_opr_mode(bno055, BNO055_OPR_MODE_CONFIG)) != BNO055_OK)
         return (err);
-    HAL_Delay(2);
+    HAL_Delay(BNO055_MINI_TIME_DELAY);
     bno055_reset(bno055);
     HAL_Delay(5000);
     if ((err = bno055_set_pwr_mode(bno055, BNO055_PWR_MODE_NORMAL)) != BNO055_OK)
@@ -47,29 +47,44 @@ t_bno055_err	bno055_reset(t_bno055 *bno055)
     return (BNO055_OK);
 }
 
-t_bno055	bno055_on(t_bno055 *bno055)
+t_bno055_err	bno055_on(t_bno055 *bno055)
 {
     uint8_t	data;
 
     data = 0x00U;
     if (bno055_write_regs(*bno055, BNO055_SYS_TRIGGER, &data, 1) != BNO055_OK)
         return (BNO055_ERR_I2C);
-    return (BNO_OK);
+    return (BNO055_OK);
 }
 
-t_bno055_err	bno055_euler(t_bno055 *bno055, t_bno055_euler *buf)
+t_bno055_err	bno055_linear_acc(t_bno055 *bno055, t_bno055_vec *xyz)
 {
     t_bno055_err	err;
     uint8_t			data[6];
     float			scale;
 
-    if ((err = bno055_read_regs(*bno055, BNO055_EUL_HEADING_LSB, data, 6)) != BNO055_OK)
+    if ((err = bno055_read_regs(*bno055, BNO055_LIA_DATA_X_LSB, data, 6)) != BNO055_OK)
         return (err);
-    scale = (imu->_eul_unit == BNO055_EUL_UNIT_DEG) ? BNO055_EUL_SCALE_DEG : BNO055_EUL_SCALE_RAD;
-    buf->yaw = (s16)((data[1] << 8) | data[0]) / scale;
-    buf->roll = (s16)((data[3] << 8) | data[2]) / scale;
-    buf->pitch = (s16)((data[5] << 8) | data[4]) / scale;
-    return (BNO_OK);
+    scale = (bno055->accel_unit == BNO055_ACCEL_UNITSEL_M_S2) ? BNO055_ACCEL_SCALE_M_2 : BNO055_ACCEL_SCALE_MG;
+    xyz->x = (int16_t)((data[1] << 8) | data[0]) / scale;
+    xyz->y = (int16_t)((data[3] << 8) | data[2]) / scale;
+    xyz->z = (int16_t)((data[5] << 8) | data[4]) / scale;
+    return (BNO055_OK);
+};
+
+t_bno055_err	bno055_gyro(t_bno055 *bno055, t_bno055_vec *xyz)
+{
+    t_bno055_err	err;
+    uint8_t			data[6];
+    float			scale;
+
+    if ((err = bno055_read_regs(*bno055, BNO055_GYRO_DATA_X_LSB, data, 6)) != BNO055_OK)
+        return (err);
+    scale = (bno055->gyro_unit == BNO055_GYRO_UNIT_DPS) ? BNO055_GYRO_SCALE_DPS : BNO055_GYRO_SCALE_RPS;
+    xyz->x = (int16_t)((data[1] << 8) | data[0]) / scale;
+    xyz->y = (int16_t)((data[3] << 8) | data[2]) / scale;
+    xyz->z = (int16_t)((data[5] << 8) | data[4]) / scale;
+    return (BNO055_OK);
 }
 
 t_bno055_err	bno055_read_regs(t_bno055 bno055, uint8_t addr, uint8_t* buf, uint32_t buf_size)
@@ -122,8 +137,8 @@ t_bno055_err	bno055_set_pwr_mode(t_bno055 *bno055, t_bno055_pwr_mode pwr_mode)
         return (err);
     if ((err = bno055_set_opr_mode(bno055, bno055->opr_mode)) != BNO055_OK)
         return (err);
-    HAL_Delay(2);
-    return (BNO_OK);
+    HAL_Delay(BNO055_MINI_TIME_DELAY);
+    return (BNO055_OK);
 }
 
 t_bno055_err	bno055_set_page(t_bno055* bno055, const t_bno055_page page)
@@ -131,15 +146,15 @@ t_bno055_err	bno055_set_page(t_bno055* bno055, const t_bno055_page page)
     t_bno055_err	err;
 
     if (bno055->page != page)
-        return (BNO_OK);
+        return (BNO055_OK);
     if (page > 0x01)
         return (BNO055_ERR_PAGE_TOO_HIGH);
     err = bno055_write_regs(*bno055, BNO055_PAGE_ID, (uint8_t*)&page, 1);
-    if (err != BNO_OK)
+    if (err != BNO055_OK)
         return (err);
     bno055->page = page;
-    HAL_Delay(2);
-    return (BNO_OK);
+    HAL_Delay(BNO055_MINI_TIME_DELAY);
+    return (BNO055_OK);
 }
 
 t_bno055_err	bno055_set_unit(t_bno055* bno055, const t_bno055_gyro_unitsel gyro_unit, const t_bno055_accel_unitsel accel_unit, const t_bno055_eul_unitsel eul_unit)
@@ -149,17 +164,17 @@ t_bno055_err	bno055_set_unit(t_bno055* bno055, const t_bno055_gyro_unitsel gyro_
 
     if ((err = bno055_set_opr_mode(bno055, BNO055_OPR_MODE_CONFIG)) != BNO055_OK)
         return (err);
-    if ((err = bno055_set_page(bno, BNO055_PAGE_0)) != BNO055_OK)
+    if ((err = bno055_set_page(bno055, BNO055_PAGE_0)) != BNO055_OK)
         return (err);
     data = gyro_unit | accel_unit | eul_unit;
     if ((err = bno055_write_regs(*bno055, BNO055_UNIT_SEL, &data, 1)) != BNO055_OK)
         return (err);
-    bno055->gyr_unit = gyro_unit;
-    bno055->acc_unit = accel_unit;
+    bno055->gyro_unit = gyro_unit;
+    bno055->accel_unit = accel_unit;
     bno055->eul_unit = eul_unit;
     if ((err = bno055_set_opr_mode(bno055, bno055->opr_mode)) != BNO055_OK)
         return (err);
-    return (BNO_OK);
+    return (BNO055_OK);
 }
 
 char	*bno055_err_str(const t_bno055_err err)
