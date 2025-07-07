@@ -8,7 +8,11 @@
 #ifndef INC_SARA_H_
 #define INC_SARA_H_
 
-// PID Coefficients Begin
+# include "pid.h"
+# include "ukf.h"
+# include "state.h"
+
+// PID Tune Begin
 
 # define PID_HEAVE_KP 1.0f
 # define PID_HEAVE_KI 1.0f
@@ -58,9 +62,11 @@
 # define PID_YAW_INT_MIN 1.0f
 # define PID_YAW_INT_MAX 1.0f
 
-// PID Coefficients End
+// PID Tune End
 
-// State Ranges Begin
+// State Tune Begin
+
+# define STATE_COUNT 8
 
 # define STATE_1_POS_X_START 1.0f
 # define STATE_1_POS_X_END 1.0f
@@ -195,7 +201,73 @@
 # define STATE_7_EUL_Z_START 1.0f
 # define STATE_7_EUL_Z_END 1.0f
 
-// State Ranges End
+// State Tune End
 
+// UKF Tune Begin
+
+# define UKF_MATRIX_X_POS_X 0.0f
+# define UKF_MATRIX_X_POS_Y 0.0f
+# define UKF_MATRIX_X_POS_Z 0.0f
+# define UKF_MATRIX_X_VEL_X 0.0f
+# define UKF_MATRIX_X_VEL_Y 0.0f
+# define UKF_MATRIX_X_VEL_Z 0.0f
+# define UKF_MATRIX_X_ACC_X 0.0f
+# define UKF_MATRIX_X_ACC_Y 0.0f
+# define UKF_MATRIX_X_ACC_Z 0.0f
+# define UKF_MATRIX_X_QUAT_W 1.0f
+# define UKF_MATRIX_X_QUAT_X 0.0f
+# define UKF_MATRIX_X_QUAT_Y 0.0f
+# define UKF_MATRIX_X_QUAT_Z 0.0f
+# define UKF_MATRIX_X_BIAS_ACC_X 0.01f
+# define UKF_MATRIX_X_BIAS_ACC_Y -0.01f
+# define UKF_MATRIX_X_BIAS_ACC_Z 0.02f
+# define UKF_MATRIX_X_BIAS_GYRO_X 0.0005f
+# define UKF_MATRIX_X_BIAS_GYRO_Y 0.0005f
+# define UKF_MATRIX_X_BIAS_GYRO_Z -0.0005f
+# define UKF_MATRIX_X_BIAS_PRESS 0.0f
+# define UKF_MATRIX_X_BIAS_VEL_X 0.0f
+# define UKF_MATRIX_X_BIAS_VEL_Y 0.0f
+
+# define UKF_MATRIX_P_POS 1.0f
+# define UKF_MATRIX_P_VEL 0.5f
+# define UKF_MATRIX_P_ACC 0.1f
+# define UKF_MATRIX_P_QUAT 5.0f * (M_PI/180.0f)
+# define UKF_MATRIX_P_BIAS_ACC 0.49f
+# define UKF_MATRIX_P_BIAS_GYRO 0.01745f
+# define UKF_MATRIX_P_BIAS_PRESS 0.15f
+# define UKF_MATRIX_P_BIAS_VEL_X 0.03f
+# define UKF_MATRIX_P_BIAS_VEL_Y 0.03f
+
+# define UKF_MATRIX_R_PRESS 0.8155f
+# define UKF_MATRIX_R_VEL_X 0.1f
+# define UKF_MATRIX_R_VEL_Y 0.1f
+
+// ... Q ...
+
+// UKF Tune End
+
+typedef struct s_dof
+{
+	t_pid	pid_heave;
+	t_pid	pid_sway;
+	t_pid	pid_surge;
+	t_pid	pid_roll;
+	t_pid	pid_pitch;
+	t_pid	pid_yaw;
+
+} t_dof;
+
+typedef struct s_sara
+{
+	t_dof	sara_dof;
+	t_state sara_states[STATE_COUNT];
+	t_ukf	sara_ukf;
+
+} t_sara;
+
+void	sara_init(t_sara *sara);
+void	sara_init_dof(t_dof *sara_dof);
+void	sara_init_state(t_state **sara_states);
+void	sara_init_ukf(t_ukf *sara_ukf);
 
 #endif /* INC_SARA_H_ */
