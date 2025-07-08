@@ -8,9 +8,13 @@
 #ifndef INC_SARA_H_
 #define INC_SARA_H_
 
+# include "helpers.h"
 # include "pid.h"
 # include "ukf.h"
 # include "state.h"
+# include "bno055.h"
+# include "sen0257.h"
+# include "dvl650.h"
 
 // PID Tune Begin
 
@@ -240,7 +244,7 @@
 
 # define UKF_MATRIX_R_PRESS 0.8155f
 # define UKF_MATRIX_R_VEL_X 0.1f
-# define UKF_MATRIX_R_VEL_Y 0.1f// * 0.1f
+# define UKF_MATRIX_R_VEL_Y 0.1f
 
 # define UKF_MATRIX_Q_FACT_DYNA 10.0f
 # define UKF_MATRIX_Q_FACT_BIAS 5.0f
@@ -251,13 +255,6 @@
 # define UKF_MATRIX_Q_SD_BIAS_PRESS 0.0001f
 # define UKF_MATRIX_Q_SD_BIAS_VEL_X 0.002f
 # define UKF_MATRIX_Q_SD_BIAS_VEL_Y 0.002f
-//# define UKF_MATRIX_Q_ACC (UKF_MATRIX_Q_SD_ACC * UKF_MATRIX_Q_SD_ACC * UKF_MATRIX_Q_FACT_DYNA)
-//# define UKF_MATRIX_Q_GYRO (UKF_MATRIX_Q_SD_GYRO * UKF_MATRIX_Q_SD_GYRO * UKF_MATRIX_Q_FACT_DYNA)
-//# define UKF_MATRIX_Q_BIAS_ACC (UKF_MATRIX_Q_SD_BIAS_ACC * UKF_MATRIX_Q_SD_BIAS_ACC * UKF_MATRIX_Q_FACT_BIAS)
-//# define UKF_MATRIX_Q_BIAS_GYRO (UKF_MATRIX_Q_SD_BIAS_GYRO * UKF_MATRIX_Q_SD_BIAS_GYRO * UKF_MATRIX_Q_FACT_BIAS)
-//# define UKF_MATRIX_Q_BIAS_PRESS (UKF_MATRIX_Q_SD_BIAS_PRESS * UKF_MATRIX_Q_SD_BIAS_PRESS)
-//# define UKF_MATRIX_Q_BIAS_VEL_X (UKF_MATRIX_Q_SD_BIAS_VEL_X * UKF_MATRIX_Q_SD_BIAS_VEL_X)
-//# define UKF_MATRIX_Q_BIAS_VEL_Y (UKF_MATRIX_Q_SD_BIAS_VEL_Y * UKF_MATRIX_Q_SD_BIAS_VEL_Y)
 
 // UKF Tune End
 
@@ -272,17 +269,27 @@ typedef struct s_dof
 
 } t_dof;
 
+typedef struct s_sensor
+{
+	t_bno055	bno055;
+	t_sen0257	sen0257;
+	t_dvl650	dvl650;
+
+} t_sensor;
+
 typedef struct s_sara
 {
-	t_dof	sara_dof;
-	t_state sara_states[STATE_COUNT];
-	t_ukf	sara_ukf;
+	t_dof		sara_dof;
+	t_state 	sara_states[STATE_COUNT];
+	t_ukf		sara_ukf;
+	t_sensor	sara_sensor;
 
 } t_sara;
 
-void	sara_init(t_sara *sara);
+void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
 void	sara_init_dof(t_dof *sara_dof);
-void	sara_init_state(t_state **sara_states);
+void	sara_init_state(t_state *sara_states[STATE_COUNT]);
 void	sara_init_ukf(t_ukf *sara_ukf);
+void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
 
 #endif /* INC_SARA_H_ */

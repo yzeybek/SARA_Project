@@ -11,6 +11,7 @@
 # include "stdbool.h"
 # include "stm32f4xx.h"
 
+# define BNO055_ADDR (0x29)
 # define BNO055_CHIP_ID (0x00)
 # define BNO055_DEF_CHIP_ID (0xA0)
 # define BNO055_SYS_TRIGGER (0x3F)
@@ -101,6 +102,14 @@ typedef enum e_bno055_eul_unitsel
 
 }	t_bno055_eul_unitsel;
 
+typedef struct s_bno055_vec
+{
+    float	x;
+    float	y;
+    float	z;
+
+}	t_bno055_vec;
+
 typedef struct s_bno055
 {
     struct t_bno055			*ptr;
@@ -113,16 +122,10 @@ typedef struct s_bno055
     t_bno055_accel_unitsel	accel_unit;
     t_bno055_gyro_unitsel	gyro_unit;
     t_bno055_eul_unitsel	eul_unit;
+    t_bno055_vec			linear_acc;
+    t_bno055_vec			gyro;
 
 }	t_bno055;
-
-typedef struct s_bno055_vec
-{
-    float	x;
-    float	y;
-    float	z;
-
-}	t_bno055_vec;
 
 t_bno055_err	bno055_init(t_bno055 *bno055);
 t_bno055_err	bno055_reset(t_bno055 *bno055);

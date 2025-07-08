@@ -7,11 +7,12 @@
 
 #include "sara.h"
 
-void	sara_init(t_sara *sara)
+void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc)
 {
 	sara_init_dof(&sara->dof);
 	sara_init_state(&sara->states);
 	sara_init_ukf(&sara->ukf);
+	sara_init_sensor(&sara->sensor, hi2c, hadc);
 }
 
 void	sara_init_pid(t_dof *sara_dof)
@@ -73,7 +74,7 @@ void	sara_init_pid(t_dof *sara_dof)
 	pid_init(&dof->pid_yaw, pid_values);
 }
 
-void	sara_init_state(t_state **sara_states)
+void	sara_init_state(t_state *sara_states[STATE_COUNT])
 {
 	t_range	state_ranges[9];
 
@@ -241,14 +242,72 @@ void	sara_init_state(t_state **sara_states)
 	states[STATE_COUNT - 1] = &(t_state){0};
 }
 
-void	sara_ukf_f(float ukf_matrix_x[UKF_SIZE_STATE], float ukf_matrix_u[UKF_SIZE_INPUT], float *ukf_matrix_x_new[UKF_SIZE_STATE])
+void	sara_ukf_f(float ukf_matrix_x[UKF_SIZE_STATE], float ukf_matrix_u[UKF_SIZE_INPUT], float ukf_matrix_x_new[UKF_SIZE_STATE], float dt)
 {
-
+	const float G_WORLD[3] = { 0.0f, 0.0f, 9.81f };
+	memset(ukf_matrix_x_new, 0, UKF_SIZE_STATE * sizeof(float));
+	const float *p_k  = &ukf_matrix_x[0];
+	const float *v_k  = &ukf_matrix_x[3];
+	const float *a_k  = &ukf_matrix_x[6];
+	const float *q_k  = &ukf_matrix_x[9];
+	const float *b_a  = &ukf_matrix_x[13];
+	const float *b_g  = &ukf_matrix_x[16];
+	float        b_p  = ukf_matrix_x[19];
+	float        b_vx = ukf_matrix_x[20];
+	float        b_vy = ukf_matrix_x[21];
+	float omega_corr[3] =
+	{
+		ukf_matrix_u[3] - b_g[0],
+		ukf_matrix_u[4] - b_g[1],
+		ukf_matrix_u[5] - b_g[2]
+	};
+	integrate_quat(q_k, omega_corr, dt, &ukf_matrix_x_new[9]);
+	float accel_body[3] =
+	{
+		ukf_matrix_u[0] - b_a[0],
+		ukf_matrix_u[1] - b_a[1],
+		ukf_matrix_u[2] - b_a[2]
+	};
+	float R_w2b[3][3];
+	quat_to_rotm(&ukf_matrix_x_new[9], R_w2b);
+	float R_b2w[3][3];
+	for(int i=0;i<3;i++)
+		for(int j=0;j<3;j++)
+			R_b2w[i][j] = R_w2b[j][i];
+	float a_k1[3];
+	for (int i = 0; i < 3; i++)
+	{
+		float sum = 0.0f;
+		for (int j = 0; j < 3; j++)
+			sum += R_b2w[i][j] * accel_body[j];
+		a_k1[i] = sum - G_WORLD[i];
+		ukf_matrix_x_new[6 + i] = a_k1[i];
+	}
+	for (int i = 0; i < 3; i++)
+		ukf_matrix_x_new[3 + i] = v_k[i] + a_k[i] * dt;
+	float half_dt2 = 0.5f * dt * dt;
+	for (int i = 0; i < 3; i++)
+		ukf_matrix_x_new[i] = p_k[i] + v_k[i] * dt + a_k[i] * half_dt2;
+	memcpy(&ukf_matrix_x_new[13],  b_a, 3 * sizeof(float));
+	memcpy(&ukf_matrix_x_new[16], b_g, 3 * sizeof(float));
+	ukf_matrix_x_new[19] = b_p;
+	ukf_matrix_x_new[20] = b_vx;
+	ukf_matrix_x_new[21] = b_vy;
 }
 
-void	sara_ukf_h(float ukf_matrix_x[UKF_SIZE_STATE], float *ukf_matrix_z[UKF_SIZE_MEAS])
+void	sara_ukf_h(float ukf_matrix_x[UKF_SIZE_STATE], float ukf_matrix_z[UKF_SIZE_MEAS])
 {
-
+	const float *p = &ukf_matrix_x[0];
+	const float *v = &ukf_matrix_x[3];
+	const float *q = &ukf_matrix_x[9];
+	ukf_matrix_z[0] = p[2];
+	float R_w2b[3][3];
+	quat_to_rotm(q, R_w2b);
+	float v_b[3];
+	for (int i = 0; i < 3; i++)
+		v_b[i] = R_w2b[i][0] * v[0] + R_w2b[i][1] * v[1] + R_w2b[i][2] * v[2];
+	ukf_matrix_z[1] = v_b[0];
+	ukf_matrix_z[2] = v_b[1];
 }
 
 void	sara_init_ukf(t_ukf *sara_ukf)
@@ -297,11 +356,39 @@ void	sara_init_ukf(t_ukf *sara_ukf)
 	float	ukf_matrix_r[UKF_SIZE_MEAS][UKF_SIZE_MEAS] = (float[UKF_SIZE_MEAS][UKF_SIZE_MEAS]){0};
 	ukf_matrix_r[0][0] = UKF_MATRIX_R_PRESS * UKF_MATRIX_R_PRESS;
 	ukf_matrix_r[1][1] = UKF_MATRIX_R_VEL_X * UKF_MATRIX_R_VEL_X;
-	ukf_matrix_r[2][2] = UKF_MATRIX_R_VEL_X * UKF_MATRIX_R_VEL_X;
+	ukf_matrix_r[2][2] = UKF_MATRIX_R_VEL_Y * UKF_MATRIX_R_VEL_Y;
 
 	float	ukf_matrix_q[UKF_SIZE_STATE][UKF_SIZE_STATE];
-	//...
-
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_q[6 + k][6 + k] = UKF_MATRIX_Q_SD_ACC * UKF_MATRIX_Q_SD_ACC * UKF_MATRIX_Q_FACT_DYNA;
+	for (int k = 0; k < 4; k++)
+		ukf_matrix_q[9 + k][9 + k] = UKF_MATRIX_Q_SD_GYRO * UKF_MATRIX_Q_SD_GYRO * UKF_MATRIX_Q_FACT_DYNA;
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_q[13 + k][13 + k] = UKF_MATRIX_Q_SD_BIAS_ACC * UKF_MATRIX_Q_SD_BIAS_ACC * UKF_MATRIX_Q_FACT_BIAS;
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_q[16 + k][16 + k] = UKF_MATRIX_Q_SD_BIAS_GYRO * UKF_MATRIX_Q_SD_BIAS_GYRO * UKF_MATRIX_Q_FACT_BIAS;
+	ukf_matrix_q[19][19] = UKF_MATRIX_Q_SD_BIAS_PRESS * UKF_MATRIX_Q_SD_BIAS_PRESS;
+	ukf_matrix_q[20][20] = UKF_MATRIX_Q_SD_BIAS_VEL_X * UKF_MATRIX_Q_SD_BIAS_VEL_X;
+	ukf_matrix_q[21][21] = UKF_MATRIX_Q_SD_BIAS_VEL_Y * UKF_MATRIX_Q_SD_BIAS_VEL_Y;
 
 	ukf_init(sara_ukf, &ukf_matrix_x, &ukf_matrix_p, &ukf_matrix_q, &ukf_matrix_r, sara_ukf_f, sara_ukf_h);
+}
+
+void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc)
+{
+	t_bno055_err err;
+	sensor->bno055 = (t_bno055){ .i2c = hi2c, .addr = BNO055_ADDR, .opr_mode = BNO055_OPR_MODE_IMU };
+	HAL_Delay(1000);
+	if ((err = bno055_init(&sensor->bno055)) == BNO055_OK)
+		HAL_Delay(100);
+	else
+		Error_Handler();
+	HAL_Delay(100);
+	err = bno055_set_unit(&sensor->bno055, BNO055_GYRO_UNIT_DPS, BNO055_ACCEL_UNITSEL_M_S2, BNO055_EUL_UNIT_DEG);
+	if (err != BNO055_OK)
+		printf("[BNO] Failed to set units. Err: %d\r\n", err);
+	else
+		printf("[BNO] Unit selection success\r\n");
+	HAL_Delay(1000);
+	sen0257_init(&sensor->sen0257, hadc);
 }

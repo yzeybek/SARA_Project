@@ -17,17 +17,17 @@
 #endif
 
 #ifndef UKF_SIZE_INPUT
-# define UKF_SIZE_INPUT 9
+# define UKF_SIZE_INPUT 6
 #endif
 
 # define UKF_SIZE_SIGMA (2 * UKF_STATE_SIZE + 1)
 # define UKF_ALPHA 0.1f
 # define UKF_KAPPA 0.0f
 # define UKF_BETA 2.0f
-# define UKF_SIGMA_LAMBDA (UKF_ALPHA * UKF_ALPHA * (UKF_STATE_SIZE + UKF_KAPPA) - UKF_STATE_SIZE);
+# define UKF_SIGMA_LAMBDA (UKF_ALPHA * UKF_ALPHA * (UKF_STATE_SIZE + UKF_KAPPA) - UKF_STATE_SIZE)
 
-typedef void (*t_ukf_f)(float[UKF_SIZE_STATE], float[UKF_SIZE_INPUT], float*[UKF_SIZE_STATE]);
-typedef void (*t_ukf_h)(float[UKF_SIZE_STATE], float*[UKF_SIZE_MEAS]);
+typedef void (*t_ukf_f)(float[UKF_SIZE_STATE], float[UKF_SIZE_INPUT], float[UKF_SIZE_STATE], float dt);
+typedef void (*t_ukf_h)(float[UKF_SIZE_STATE], float[UKF_SIZE_MEAS]);
 
 typedef struct s_ukf
 {

@@ -14,6 +14,8 @@ t_bno055_err	bno055_init(t_bno055 *bno055)
 
     id = 0;
     bno055->addr = (bno055->addr << 1);
+    bno055->linear_acc = (t_bno055_vec){0};
+    bno055->gyro = (t_bno055_vec){0};
     err = bno055_read_regs(*bno055, BNO055_CHIP_ID, &id, 1);
     if (err != BNO055_OK)
         return (err);
