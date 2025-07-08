@@ -254,16 +254,54 @@ void	sara_ukf_h(float ukf_matrix_x[UKF_SIZE_STATE], float *ukf_matrix_z[UKF_SIZE
 void	sara_init_ukf(t_ukf *sara_ukf)
 {
 	float	ukf_matrix_x[UKF_SIZE_STATE];
-	// ...
+	ukf_matrix_x[0] = UKF_MATRIX_X_POS_X;
+	ukf_matrix_x[1] = UKF_MATRIX_X_POS_Y;
+	ukf_matrix_x[2] = UKF_MATRIX_X_POS_Z;
+	ukf_matrix_x[3] = UKF_MATRIX_X_VEL_X;
+	ukf_matrix_x[4] = UKF_MATRIX_X_VEL_Y;
+	ukf_matrix_x[5] = UKF_MATRIX_X_VEL_Z;
+	ukf_matrix_x[6] = UKF_MATRIX_X_ACC_X;
+	ukf_matrix_x[7] = UKF_MATRIX_X_ACC_Y;
+	ukf_matrix_x[8] = UKF_MATRIX_X_ACC_Z;
+	ukf_matrix_x[9] = UKF_MATRIX_X_QUAT_W;
+	ukf_matrix_x[10] = UKF_MATRIX_X_QUAT_X;
+	ukf_matrix_x[11] = UKF_MATRIX_X_QUAT_Y;
+	ukf_matrix_x[12] = UKF_MATRIX_X_QUAT_Z;
+	ukf_matrix_x[13] = UKF_MATRIX_X_BIAS_ACC_X;
+	ukf_matrix_x[14] = UKF_MATRIX_X_BIAS_ACC_Y;
+	ukf_matrix_x[15] = UKF_MATRIX_X_BIAS_ACC_Z;
+	ukf_matrix_x[16] = UKF_MATRIX_X_BIAS_GYRO_X;
+	ukf_matrix_x[17] = UKF_MATRIX_X_BIAS_GYRO_Y;
+	ukf_matrix_x[18] = UKF_MATRIX_X_BIAS_GYRO_Z;
+	ukf_matrix_x[19] = UKF_MATRIX_X_BIAS_PRESS;
+	ukf_matrix_x[20] = UKF_MATRIX_X_BIAS_VEL_X;
+	ukf_matrix_x[21] = UKF_MATRIX_X_BIAS_VEL_Y;
 
-	float	ukf_matrix_p[UKF_SIZE_STATE][UKF_SIZE_STATE];
-	// ...
+	float	ukf_matrix_p[UKF_SIZE_STATE][UKF_SIZE_STATE] = (float[UKF_SIZE_STATE][UKF_SIZE_STATE]){0};
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_p[k][k] = UKF_MATRIX_P_POS * UKF_MATRIX_P_POS;
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_p[3 + k][3 + k] = UKF_MATRIX_P_VEL * UKF_MATRIX_P_VEL;
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_p[6 + k][6 + k] = UKF_MATRIX_P_ACC * UKF_MATRIX_P_ACC;
+	for (int k = 0; k < 4; k++)
+		ukf_matrix_p[9 + k][9 + k] = UKF_MATRIX_P_QUAT * UKF_MATRIX_P_QUAT;
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_p[13 + k][13 + k] = UKF_MATRIX_P_BIAS_ACC * UKF_MATRIX_P_BIAS_ACC;
+	for (int k = 0; k < 3; k++)
+		ukf_matrix_p[16 + k][16 + k] = UKF_MATRIX_P_BIAS_GYRO * UKF_MATRIX_P_BIAS_GYRO;
+	ukf_matrix_p[19][19] = UKF_MATRIX_P_BIAS_PRESS * UKF_MATRIX_P_BIAS_PRESS;
+	ukf_matrix_p[20][20] = UKF_MATRIX_P_BIAS_VEL_X * UKF_MATRIX_P_BIAS_VEL_X;
+	ukf_matrix_p[21][21] = UKF_MATRIX_P_BIAS_VEL_Y * UKF_MATRIX_P_BIAS_VEL_Y;
+
+	float	ukf_matrix_r[UKF_SIZE_MEAS][UKF_SIZE_MEAS] = (float[UKF_SIZE_MEAS][UKF_SIZE_MEAS]){0};
+	ukf_matrix_r[0][0] = UKF_MATRIX_R_PRESS * UKF_MATRIX_R_PRESS;
+	ukf_matrix_r[1][1] = UKF_MATRIX_R_VEL_X * UKF_MATRIX_R_VEL_X;
+	ukf_matrix_r[2][2] = UKF_MATRIX_R_VEL_X * UKF_MATRIX_R_VEL_X;
 
 	float	ukf_matrix_q[UKF_SIZE_STATE][UKF_SIZE_STATE];
-	// ...
+	//...
 
-	float	ukf_matrix_r[UKF_SIZE_MEAS][UKF_SIZE_MEAS];
-	// ...
 
 	ukf_init(sara_ukf, &ukf_matrix_x, &ukf_matrix_p, &ukf_matrix_q, &ukf_matrix_r, sara_ukf_f, sara_ukf_h);
 }
