@@ -37,7 +37,7 @@ bool	state_validate(t_state desired, float currents[9])
 
 uint8_t	state_machine(t_state *states, uint8_t index, float currents[9])
 {
-	if (states && states[index] && state_validate(states[index], currents))
+	if (states && states[index].pos_x.start && state_validate(states[index], currents))
 		return (index + 1);
 	return (index);
 }

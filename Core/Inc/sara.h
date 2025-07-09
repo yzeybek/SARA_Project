@@ -288,7 +288,7 @@ typedef struct s_sara
 
 void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
 void	sara_init_dof(t_dof *sara_dof);
-void	sara_init_state(t_state *sara_states[STATE_COUNT]);
+void	sara_init_state(t_state sara_states[STATE_COUNT]);
 void	sara_init_ukf(t_ukf *sara_ukf);
 void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
 

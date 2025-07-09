@@ -107,7 +107,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-  sara_init(sara, &hi2c1, &hadc);
+  sara_init(sara, &hi2c1, &hadc1);
 
   /* USER CODE END 2 */
 
