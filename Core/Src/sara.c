@@ -7,12 +7,13 @@
 
 #include "sara.h"
 
-void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc)
+void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m)
 {
 	sara_init_dof(&sara->sara_dof);
 	sara_init_state(sara->sara_states);
 	sara_init_ukf(&sara->sara_ukf);
 	sara_init_sensor(&sara->sara_sensor, hi2c, hadc);
+	sara_init_control(&sara->sara_control, htim_f, htim_m);
 }
 
 void	sara_init_dof(t_dof *sara_dof)
@@ -382,3 +383,13 @@ void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeD
 	bno055_set_unit(&sensor->bno055, BNO055_GYRO_UNIT_DPS, BNO055_ACCEL_UNITSEL_M_S2, BNO055_EUL_UNIT_DEG);
 	sen0257_init(&sensor->sen0257, hadc);
 }
+
+void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m)
+{
+	d646wp_init(&control->fin1, htim_f, TIM_CHANNEL_1, 1000, 2000, 8400);
+	d646wp_init(&control->fin2, htim_f, TIM_CHANNEL_2, 1000, 2000, 8400);
+	d646wp_init(&control->fin3, htim_f, TIM_CHANNEL_3, 1000, 2000, 8400);
+	d646wp_init(&control->fin4, htim_f, TIM_CHANNEL_4, 1000, 2000, 8400);
+	ultras_init(&control->ultras, htim_m, TIM_CHANNEL_1, 1000, 2000, 20000);
+}
+

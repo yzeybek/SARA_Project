@@ -15,6 +15,8 @@
 # include "bno055.h"
 # include "sen0257.h"
 # include "dvl650.h"
+# include "d646wp.h"
+# include "ultras.h"
 
 // PID Tune Begin
 
@@ -277,19 +279,31 @@ typedef struct s_sensor
 
 } t_sensor;
 
+typedef struct s_control
+{
+	t_d646wp	fin1;
+	t_d646wp	fin2;
+	t_d646wp	fin3;
+	t_d646wp	fin4;
+	t_ultras	ultras;
+
+} t_control;
+
 typedef struct s_sara
 {
 	t_dof		sara_dof;
 	t_state 	sara_states[STATE_COUNT];
 	t_ukf		sara_ukf;
 	t_sensor	sara_sensor;
+	t_control	sara_control;
 
 } t_sara;
 
-void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
+void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m);
 void	sara_init_dof(t_dof *sara_dof);
 void	sara_init_state(t_state sara_states[STATE_COUNT]);
 void	sara_init_ukf(t_ukf *sara_ukf);
 void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
+void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m);
 
 #endif /* INC_SARA_H_ */
