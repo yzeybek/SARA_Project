@@ -15,7 +15,7 @@ void	sen0257_init(t_sen0257 *sen0257, ADC_HandleTypeDef *hadc)
 	sen0257->voltage = 0.0f;
 }
 
-void	sen0257_read(t_sen0257 *sen0257)
+void	sen0257_update(t_sen0257 *sen0257)
 {
 	HAL_ADC_Start(sen0257->hadc);
 	HAL_ADC_PollForConversion(sen0257->hadc, HAL_MAX_DELAY);

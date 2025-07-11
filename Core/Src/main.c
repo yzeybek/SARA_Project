@@ -120,7 +120,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+		sara_update(sara);
 	}
   /* USER CODE END 3 */
 }

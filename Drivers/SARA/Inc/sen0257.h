@@ -18,7 +18,7 @@
 typedef struct s_sen0257
 {
 	ADC_HandleTypeDef	*hadc;
-	uint32_t			raw;
+	unsigned int		raw;
 	float				voltage;
 	float				pressure;
 
@@ -26,6 +26,6 @@ typedef struct s_sen0257
 
 
 void	sen0257_init(t_sen0257 *sen0257, ADC_HandleTypeDef *hadc);
-void	sen0257_read(t_sen0257 *sen0257);
+void	sen0257_update(t_sen0257 *sen0257);
 
 #endif /* SARA_INC_SEN0257_H_ */

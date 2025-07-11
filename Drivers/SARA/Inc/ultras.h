@@ -13,14 +13,14 @@
 typedef struct s_ultras
 {
 	TIM_HandleTypeDef	*htim;
-	uint32_t			min_pulse;
-	uint32_t			max_pulse;
-	uint32_t			channel;
-	uint32_t			period;
+	int					min_pulse;
+	int					max_pulse;
+	int					channel;
+	int					period;
 
 } t_ultras;
 
-void	ultras_init(t_ultras *ultras, TIM_HandleTypeDef *htim, uint32_t min_pulse, uint32_t max_pulse, uint32_t channel, uint32_t period);
-void	ultras_update(t_ultras *ultras, uint32_t pulse);
+void	ultras_init(t_ultras *ultras, TIM_HandleTypeDef *htim, int min_pulse, int max_pulse, int channel, int period);
+void	ultras_update(t_ultras *ultras, int pulse);
 
 #endif /* SARA_INC_ULTRAS_H_ */

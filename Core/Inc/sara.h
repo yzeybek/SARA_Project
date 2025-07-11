@@ -72,7 +72,7 @@
 
 // State Tune Begin
 
-# define STATE_COUNT 8
+# define STATE_COUNT 7
 
 # define STATE_1_POS_X_START 1.0f
 # define STATE_1_POS_X_END 1.0f
@@ -260,6 +260,49 @@
 
 // UKF Tune End
 
+// Control Tune Start
+
+# define CONTROL_FIN_RADIUS 0.12f
+
+# define CONTROL_FIN_1_START 0
+# define CONTROL_FIN_1_FINISH 0
+# define CONTROL_FIN_1_US_MIN 1000
+# define CONTROL_FIN_1_US_MAX 2000
+# define CONTROL_FIN_1_PERIOD 8400
+
+# define CONTROL_FIN_2_START 0
+# define CONTROL_FIN_2_FINISH 0
+# define CONTROL_FIN_2_US_MIN 1000
+# define CONTROL_FIN_2_US_MAX 2000
+# define CONTROL_FIN_2_PERIOD 8400
+
+# define CONTROL_FIN_3_START 0
+# define CONTROL_FIN_3_FINISH 0
+# define CONTROL_FIN_3_US_MIN 1000
+# define CONTROL_FIN_3_US_MAX 2000
+# define CONTROL_FIN_3_PERIOD 8400
+
+# define CONTROL_FIN_4_START 0
+# define CONTROL_FIN_4_FINISH 0
+# define CONTROL_FIN_4_US_MIN 1000
+# define CONTROL_FIN_4_US_MAX 2000
+# define CONTROL_FIN_4_PERIOD 8400
+
+# define CONTROL_ULTRAS_START 1000
+# define CONTROL_ULTRAS_FINISH 1000
+# define CONTROL_ULTRAS_PULSE_MIN 1000
+# define CONTROL_ULTRAS_PULSE_MAX 2000
+# define CONTROL_ULTRAS_PERIOD 20000
+
+#define CONTROL_GAIN_SURGE 1.0f
+#define CONTROL_GAIN_HEAVE 1.0f
+#define CONTROL_GAIN_SWAY 1.0f
+#define CONTROL_GAIN_ROLL 1.0f
+#define CONTROL_GAIN_PITCH 1.0f
+#define CONTROL_GAIN_YAW 1.0f
+
+// Control Tune End
+
 typedef struct s_dof
 {
 	t_pid	pid_heave;
@@ -281,10 +324,10 @@ typedef struct s_sensor
 
 typedef struct s_control
 {
-	t_d646wp	fin1;
-	t_d646wp	fin2;
-	t_d646wp	fin3;
-	t_d646wp	fin4;
+	t_d646wp	fin_1;
+	t_d646wp	fin_2;
+	t_d646wp	fin_3;
+	t_d646wp	fin_4;
 	t_ultras	ultras;
 
 } t_control;
@@ -293,17 +336,22 @@ typedef struct s_sara
 {
 	t_dof		sara_dof;
 	t_state 	sara_states[STATE_COUNT];
+	uint8_t		sara_state;
 	t_ukf		sara_ukf;
 	t_sensor	sara_sensor;
 	t_control	sara_control;
 
 } t_sara;
 
-void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m);
+void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras);
 void	sara_init_dof(t_dof *sara_dof);
 void	sara_init_state(t_state sara_states[STATE_COUNT]);
 void	sara_init_ukf(t_ukf *sara_ukf);
 void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
-void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m);
+void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras);
+
+void	sara_update(t_sara *sara);
+void	sara_update_read(t_sensor *sensor, float read_buf[9]);
+void	sara_update_write(t_control *control, float write_buf[5]);
 
 #endif /* INC_SARA_H_ */

@@ -57,3 +57,43 @@ void	arm_matrix_identity_f32(arm_matrix_instance_f32* p_mat, int size)
         p_mat->pData[i * size + i] = 1.0f;
     }
 }
+
+void	quat_to_euler(const float q[4], float *roll, float *pitch, float *yaw)
+{
+	float	sinr_cosp;
+	float	cosr_cosp;
+	float	cosy_cosp;
+	float	siny_cosp;
+	float	sinp;
+    float	qw;
+    float	qx;
+    float	qy;
+    float	qz;
+
+    qw = q[0];
+    qx = q[1];
+    qy = q[2];
+    qz = q[3];
+    sinr_cosp = 2.0f * (qw * qx + qy * qz);
+    cosr_cosp = 1.0f - 2.0f * (qx * qx + qy * qy);
+    *roll = atan2f(sinr_cosp, cosr_cosp);
+    sinp = 2.0f * (qw * qy - qz * qx);
+    if (sinp > 1.0f)
+    	sinp = 1.0f;
+    else if (sinp < -1.0f)
+    	sinp = -1.0f;
+    *pitch = asinf(sinp);
+    siny_cosp = 2.0f * (qw * qz + qx * qy);
+    cosy_cosp = 1.0f - 2.0f * (qy * qy + qz * qz);
+    *yaw = atan2f(siny_cosp, cosy_cosp);
+}
+
+float	wrap_pi(float value)
+{
+	if (a > M_PI)
+		a -= 2.0f * M_PI;
+	else if (a < -M_PI)
+		a += 2.0f * M_PI;
+	return (a);
+}
+

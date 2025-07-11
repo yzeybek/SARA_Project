@@ -8,7 +8,6 @@
 #ifndef SARA_INC_BNO055_H_
 #define SARA_INC_BNO055_H_
 
-# include "stdbool.h"
 # include "stm32f4xx.h"
 
 # define BNO055_ADDR (0x29)

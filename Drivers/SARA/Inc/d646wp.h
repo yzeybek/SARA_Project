@@ -13,14 +13,14 @@
 typedef struct s_d646wp
 {
     TIM_HandleTypeDef	*htim;
-    uint32_t			channel;
-    uint32_t          	min_us;
-    uint32_t           	max_us;
-    uint32_t           	period;
+    int					channel;
+    int         		min_us;
+    int           		max_us;
+    int           		period;
 
 }	t_d646wp;
 
-void	d646wp_init(t_d646wp *dp, TIM_HandleTypeDef* htim, uint32_t channel, uint32_t min_us, uint32_t max_us, uint32_t period);
-void	d646wp_update(t_d646wp *dp, uint32_t angle);
+void	d646wp_init(t_d646wp *d646wp, TIM_HandleTypeDef* htim, int channel, int min_us, int max_us, int period);
+void	d646wp_update(t_d646wp *d646wp, uint8_t angle);
 
 #endif /* SARA_INC_D646WP_H_ */

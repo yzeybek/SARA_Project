@@ -145,8 +145,8 @@ void ukf_update(t_ukf *ukf, float ukf_matrix_u[UKF_SIZE_INPUT], float dt)
     arm_mat_scale_f32(&P_predicted, 0.5f, &P_predicted);
     for (int i = 0; i < n_sigma; i++)
     {
-        float* current_sigma_in = &sigmas_k_plus_1_predicted_data[i * n_state];
-        float* current_z_out = &z_sigmas_predicted_data[i * n_meas];
+        float *current_sigma_in = &sigmas_k_plus_1_predicted_data[i * n_state];
+        float *current_z_out = &z_sigmas_predicted_data[i * n_meas];
         ukf->ukf_h(current_sigma_in, current_z_out);
     }
     arm_mat_mult_f32(&Z_sigmas, &W_m, &Z_m_predicted);
@@ -180,7 +180,7 @@ void ukf_update(t_ukf *ukf, float ukf_matrix_u[UKF_SIZE_INPUT], float dt)
         arm_mat_add_f32(&Pz, &eye_m, &Pz);
         status = arm_mat_inverse_f32(&Pz, &Pz_inv);
         if (status != ARM_MATH_SUCCESS)
-            return;
+            return ;
     }
     arm_mat_mult_f32(&Pxz, &Pz_inv, &K_gain);
     float* z_meas = &ukf_matrix_u[6];

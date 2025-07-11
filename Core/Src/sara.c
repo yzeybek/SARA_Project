@@ -7,13 +7,14 @@
 
 #include "sara.h"
 
-void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m)
+void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
 {
 	sara_init_dof(&sara->sara_dof);
 	sara_init_state(sara->sara_states);
+	sara->sara_state = 0;
 	sara_init_ukf(&sara->sara_ukf);
 	sara_init_sensor(&sara->sara_sensor, hi2c, hadc);
-	sara_init_control(&sara->sara_control, htim_f, htim_m);
+	sara_init_control(&sara->sara_control, htim_fin, htim_ultras);
 }
 
 void	sara_init_dof(t_dof *sara_dof)
@@ -239,8 +240,6 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[8].end = STATE_7_EUL_Z_END;
 		state_init(&sara_states[6], state_ranges);
 	}
-
-	sara_states[STATE_COUNT - 1] = (t_state){0};
 }
 
 void	sara_ukf_f(float ukf_matrix_x[UKF_SIZE_STATE], float ukf_matrix_u[UKF_SIZE_INPUT], float ukf_matrix_x_new[UKF_SIZE_STATE], float dt)
@@ -384,12 +383,96 @@ void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeD
 	sen0257_init(&sensor->sen0257, hadc);
 }
 
-void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_f, TIM_HandleTypeDef *htim_m)
+void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
 {
-	d646wp_init(&control->fin1, htim_f, TIM_CHANNEL_1, 1000, 2000, 8400);
-	d646wp_init(&control->fin2, htim_f, TIM_CHANNEL_2, 1000, 2000, 8400);
-	d646wp_init(&control->fin3, htim_f, TIM_CHANNEL_3, 1000, 2000, 8400);
-	d646wp_init(&control->fin4, htim_f, TIM_CHANNEL_4, 1000, 2000, 8400);
-	ultras_init(&control->ultras, htim_m, TIM_CHANNEL_1, 1000, 2000, 20000);
+	d646wp_init(&control->fin_1, htim_fin, TIM_CHANNEL_1, CONTROL_FIN_1_US_MIN, CONTROL_FIN_1_US_MAX, CONTROL_FIN_1_PERIOD);
+	d646wp_init(&control->fin_2, htim_fin, TIM_CHANNEL_2, CONTROL_FIN_2_US_MIN, CONTROL_FIN_2_US_MAX, CONTROL_FIN_2_PERIOD);
+	d646wp_init(&control->fin_3, htim_fin, TIM_CHANNEL_3, CONTROL_FIN_3_US_MIN, CONTROL_FIN_3_US_MAX, CONTROL_FIN_3_PERIOD);
+	d646wp_init(&control->fin_4, htim_fin, TIM_CHANNEL_4, CONTROL_FIN_4_US_MIN, CONTROL_FIN_4_US_MAX, CONTROL_FIN_4_PERIOD);
+	ultras_init(&control->ultras, htim_ultras, TIM_CHANNEL_1, CONTROL_ULTRAS_PULSE_MIN, CONTROL_ULTRAS_PULSE_MAX, CONTROL_ULTRAS_PERIOD);
 }
 
+void	sara_update(t_sara *sara)
+{
+	const float flap_theta[4] = { M_PI/4.0f, 3.0f*M_PI/4.0f, 5.0f*M_PI/4.0f, 7.0f*M_PI/4.0f };
+	float			state_curr[9];
+	float			state_next[9];
+	float			write_buf[6];
+	float			commands[6];
+	float			read_buf[9];
+	uint32_t static	last_ms;
+	uint32_t		now_ms;
+	float			dt;
+
+	now_ms = HAL_GetTick();
+	dt = (now_ms - last_ms) * 1e-3f;
+	last_ms = now_ms;
+	if (dt <= 0.0f)
+		dt = 1e-3f;
+	if (dt > 0.1f)
+		dt = 1e-3f;
+	sara_update_read(&sara->sara_sensor, read_buf);
+	ukf_update(&sara->sara_ukf, read_buf, dt);
+	state_curr[0] = sara->sara_ukf.ukf_matrix_x[0];
+	state_curr[1] = sara->sara_ukf.ukf_matrix_x[1];
+	state_curr[2] = sara->sara_ukf.ukf_matrix_x[2];
+	state_curr[3] = sara->sara_ukf.ukf_matrix_x[3];
+	state_curr[4] = sara->sara_ukf.ukf_matrix_x[4];
+	state_curr[5] = sara->sara_ukf.ukf_matrix_x[5];
+	quat_to_euler(&sara->sara_ukf.ukf_matrix_x[6], &state_curr[6], &state_curr[7], &state_curr[8]);
+	sara->sara_state = state_machine(sara->sara_states, sara->sara_state, state_curr);
+	if (sara->sara_state < STATE_COUNT)
+	{
+		state_next[0] = (sara->sara_states[sara->sara_state].pos_x.start + sara->sara_states[sara->sara_state].pos_x.end) / 2;
+		state_next[1] = (sara->sara_states[sara->sara_state].pos_y.start + sara->sara_states[sara->sara_state].pos_y.end) / 2;
+		state_next[2] = (sara->sara_states[sara->sara_state].pos_z.start + sara->sara_states[sara->sara_state].pos_z.end) / 2;
+		state_next[3] = (sara->sara_states[sara->sara_state].vel_x.start + sara->sara_states[sara->sara_state].vel_x.end) / 2;
+		state_next[4] = (sara->sara_states[sara->sara_state].vel_y.start + sara->sara_states[sara->sara_state].vel_y.end) / 2;
+		state_next[5] = (sara->sara_states[sara->sara_state].vel_z.start + sara->sara_states[sara->sara_state].vel_z.end) / 2;
+		state_next[6] = (sara->sara_states[sara->sara_state].eul_x.start + sara->sara_states[sara->sara_state].eul_x.end) / 2;
+		state_next[7] = (sara->sara_states[sara->sara_state].eul_y.start + sara->sara_states[sara->sara_state].eul_y.end) / 2;
+		state_next[8] = (sara->sara_states[sara->sara_state].eul_z.start + sara->sara_states[sara->sara_state].eul_z.end) / 2;
+//		commands[0] = pid_update(&sara->sara_dof.pid_surge, state_next[3] - state_curr[3], dt);
+//		commands[1] = pid_update(&sara->sara_dof.pid_sway, state_next[4] - state_curr[4], dt);
+//		commands[2] = pid_update(&sara->sara_dof.pid_heave, state_next[5] - state_curr[5], dt);
+//		commands[3] = wrap_pi(pid_update(&sara->sara_dof.pid_roll, state_next[6] - state_curr[6], dt));
+//		commands[4] = wrap_pi(pid_update(&sara->sara_dof.pid_pitch, state_next[7] - state_curr[7], dt));
+//		commands[5] = wrap_pi(pid_update(&sara->sara_dof.pid_yaw, state_next[8] - state_curr[8], dt));
+	}
+	else
+	{
+		write_buf[0] = CONTROL_FIN_1_FINISH;
+		write_buf[1] = CONTROL_FIN_2_FINISH;
+		write_buf[2] = CONTROL_FIN_3_FINISH;
+		write_buf[3] = CONTROL_FIN_4_FINISH;
+		write_buf[4] = CONTROL_ULTRAS_START;
+	}
+	sara_update_write(&sara->sara_control, write_buf);
+	HAL_Delay(1);
+}
+
+void	sara_update_read(t_sensor *sensor, float read_buf[9])
+{
+	bno055_linear_acc(&sensor->bno055, &sensor->bno055.linear_acc);
+	bno055_gyro(&sensor->bno055, &sensor->bno055.gyro);
+	sen0257_update(&sensor->sen0257);
+	dvl650_update(&sensor->dvl650);
+	read_buf[0] = sensor->bno055.linear_acc.x;
+	read_buf[1] = sensor->bno055.linear_acc.y;
+	read_buf[2] = sensor->bno055.linear_acc.z;
+	read_buf[3] = sensor->bno055.gyro.x;
+	read_buf[4] = sensor->bno055.gyro.y;
+	read_buf[5] = sensor->bno055.gyro.z;
+	read_buf[6] = sensor->sen0257.pressure;
+	read_buf[7] = sensor->dvl650.vel_x;
+	read_buf[8] = sensor->dvl650.vel_y;
+}
+
+void	sara_update_write(t_control *control, float write_buf[5])
+{
+	d646wp_update(&control->fin_1, write_buf[0]);
+	d646wp_update(&control->fin_2, write_buf[1]);
+	d646wp_update(&control->fin_3, write_buf[2]);
+	d646wp_update(&control->fin_4, write_buf[3]);
+	ultras_update(&control->ultras, write_buf[4]);
+}
