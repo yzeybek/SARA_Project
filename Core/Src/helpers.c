@@ -97,3 +97,19 @@ float	wrap_pi(float value)
 	return (value);
 }
 
+float	wrap_degree(float value)
+{
+	float w = fmodf(value + 180.0f, 360.0f);
+	if (w < 0.0f)
+		w += 360.0f;
+	return (w - 180.0f);
+}
+
+float	degree_wrap(float value)
+{
+	if (value < 0.0f)
+		return (value + 360.0f);
+	else
+		return (value);
+}
+

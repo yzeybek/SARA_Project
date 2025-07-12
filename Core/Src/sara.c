@@ -121,12 +121,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_1_VEL_Y_END;
 		state_ranges[5].start = STATE_1_VEL_Z_START;
 		state_ranges[5].end = STATE_1_VEL_Z_END;
-		state_ranges[6].start = STATE_1_EUL_X_START;
-		state_ranges[6].end = STATE_1_EUL_X_END;
-		state_ranges[7].start = STATE_1_EUL_Y_START;
-		state_ranges[7].end = STATE_1_EUL_Y_END;
-		state_ranges[8].start = STATE_1_EUL_Z_START;
-		state_ranges[8].end = STATE_1_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_1_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_1_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_1_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_1_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_1_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_1_EUL_Z_END);
 		state_init(&sara_states[0], state_ranges);
 	}
 
@@ -144,12 +144,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_2_VEL_Y_END;
 		state_ranges[5].start = STATE_2_VEL_Z_START;
 		state_ranges[5].end = STATE_2_VEL_Z_END;
-		state_ranges[6].start = STATE_2_EUL_X_START;
-		state_ranges[6].end = STATE_2_EUL_X_END;
-		state_ranges[7].start = STATE_2_EUL_Y_START;
-		state_ranges[7].end = STATE_2_EUL_Y_END;
-		state_ranges[8].start = STATE_2_EUL_Z_START;
-		state_ranges[8].end = STATE_2_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_2_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_2_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_2_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_2_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_2_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_2_EUL_Z_END);
 		state_init(&sara_states[1], state_ranges);
 	}
 
@@ -167,12 +167,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_3_VEL_Y_END;
 		state_ranges[5].start = STATE_3_VEL_Z_START;
 		state_ranges[5].end = STATE_3_VEL_Z_END;
-		state_ranges[6].start = STATE_3_EUL_X_START;
-		state_ranges[6].end = STATE_3_EUL_X_END;
-		state_ranges[7].start = STATE_3_EUL_Y_START;
-		state_ranges[7].end = STATE_3_EUL_Y_END;
-		state_ranges[8].start = STATE_3_EUL_Z_START;
-		state_ranges[8].end = STATE_3_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_3_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_3_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_3_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_3_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_3_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_3_EUL_Z_END);
 		state_init(&sara_states[2], state_ranges);
 	}
 
@@ -190,12 +190,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_4_VEL_Y_END;
 		state_ranges[5].start = STATE_4_VEL_Z_START;
 		state_ranges[5].end = STATE_4_VEL_Z_END;
-		state_ranges[6].start = STATE_4_EUL_X_START;
-		state_ranges[6].end = STATE_4_EUL_X_END;
-		state_ranges[7].start = STATE_4_EUL_Y_START;
-		state_ranges[7].end = STATE_4_EUL_Y_END;
-		state_ranges[8].start = STATE_4_EUL_Z_START;
-		state_ranges[8].end = STATE_4_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_4_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_4_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_4_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_4_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_4_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_4_EUL_Z_END);
 		state_init(&sara_states[3], state_ranges);
 	}
 
@@ -213,12 +213,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_5_VEL_Y_END;
 		state_ranges[5].start = STATE_5_VEL_Z_START;
 		state_ranges[5].end = STATE_5_VEL_Z_END;
-		state_ranges[6].start = STATE_5_EUL_X_START;
-		state_ranges[6].end = STATE_5_EUL_X_END;
-		state_ranges[7].start = STATE_5_EUL_Y_START;
-		state_ranges[7].end = STATE_5_EUL_Y_END;
-		state_ranges[8].start = STATE_5_EUL_Z_START;
-		state_ranges[8].end = STATE_5_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_5_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_5_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_5_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_5_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_5_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_5_EUL_Z_END);
 		state_init(&sara_states[4], state_ranges);
 	}
 
@@ -236,12 +236,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_6_VEL_Y_END;
 		state_ranges[5].start = STATE_6_VEL_Z_START;
 		state_ranges[5].end = STATE_6_VEL_Z_END;
-		state_ranges[6].start = STATE_6_EUL_X_START;
-		state_ranges[6].end = STATE_6_EUL_X_END;
-		state_ranges[7].start = STATE_6_EUL_Y_START;
-		state_ranges[7].end = STATE_6_EUL_Y_END;
-		state_ranges[8].start = STATE_6_EUL_Z_START;
-		state_ranges[8].end = STATE_6_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_6_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_6_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_6_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_6_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_6_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_6_EUL_Z_END);
 		state_init(&sara_states[5], state_ranges);
 	}
 
@@ -259,12 +259,12 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[4].end = STATE_7_VEL_Y_END;
 		state_ranges[5].start = STATE_7_VEL_Z_START;
 		state_ranges[5].end = STATE_7_VEL_Z_END;
-		state_ranges[6].start = STATE_7_EUL_X_START;
-		state_ranges[6].end = STATE_7_EUL_X_END;
-		state_ranges[7].start = STATE_7_EUL_Y_START;
-		state_ranges[7].end = STATE_7_EUL_Y_END;
-		state_ranges[8].start = STATE_7_EUL_Z_START;
-		state_ranges[8].end = STATE_7_EUL_Z_END;
+		state_ranges[6].start = wrap_degree(STATE_7_EUL_X_START);
+		state_ranges[6].end = wrap_degree(STATE_7_EUL_X_END);
+		state_ranges[7].start = wrap_degree(STATE_7_EUL_Y_START);
+		state_ranges[7].end = wrap_degree(STATE_7_EUL_Y_END);
+		state_ranges[8].start = wrap_degree(STATE_7_EUL_Z_START);
+		state_ranges[8].end = wrap_degree(STATE_7_EUL_Z_END);
 		state_init(&sara_states[6], state_ranges);
 	}
 }
@@ -457,9 +457,9 @@ void	sara_update(t_sara *sara)
 		state_next[3] = (sara->sara_states[sara->sara_state].vel_x.start + sara->sara_states[sara->sara_state].vel_x.end) / 2;
 		state_next[4] = (sara->sara_states[sara->sara_state].vel_y.start + sara->sara_states[sara->sara_state].vel_y.end) / 2;
 		state_next[5] = (sara->sara_states[sara->sara_state].vel_z.start + sara->sara_states[sara->sara_state].vel_z.end) / 2;
-		state_next[6] = (sara->sara_states[sara->sara_state].eul_x.start + sara->sara_states[sara->sara_state].eul_x.end) / 2;
-		state_next[7] = (sara->sara_states[sara->sara_state].eul_y.start + sara->sara_states[sara->sara_state].eul_y.end) / 2;
-		state_next[8] = (sara->sara_states[sara->sara_state].eul_z.start + sara->sara_states[sara->sara_state].eul_z.end) / 2;
+		state_next[6] = degree_wrap((sara->sara_states[sara->sara_state].eul_x.start + sara->sara_states[sara->sara_state].eul_x.end) / 2);
+		state_next[7] = degree_wrap((sara->sara_states[sara->sara_state].eul_y.start + sara->sara_states[sara->sara_state].eul_y.end) / 2);
+		state_next[8] = degree_wrap((sara->sara_states[sara->sara_state].eul_z.start + sara->sara_states[sara->sara_state].eul_z.end) / 2);
 		commands[0] = pid_update(&sara->sara_dof.pid_surge_vel, pid_update(&sara->sara_dof.pid_surge_pos, state_next[0] - state_curr[0], dt) - state_curr[3], dt);
 		commands[1] = pid_update(&sara->sara_dof.pid_sway_vel, pid_update(&sara->sara_dof.pid_sway_pos, state_next[1] - state_curr[1], dt) - state_curr[4], dt);
 		commands[2] = pid_update(&sara->sara_dof.pid_heave_vel, pid_update(&sara->sara_dof.pid_heave_pos, state_next[2] - state_curr[2], dt) - state_curr[5], dt);
