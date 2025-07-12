@@ -90,10 +90,10 @@ void	quat_to_euler(const float q[4], float *roll, float *pitch, float *yaw)
 
 float	wrap_pi(float value)
 {
-	if (a > M_PI)
-		a -= 2.0f * M_PI;
-	else if (a < -M_PI)
-		a += 2.0f * M_PI;
-	return (a);
+	if (value > M_PI)
+		value -= 2.0f * M_PI;
+	else if (value < -M_PI)
+		value += 2.0f * M_PI;
+	return (value);
 }
 

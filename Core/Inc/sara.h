@@ -20,29 +20,53 @@
 
 // PID Tune Begin
 
-# define PID_HEAVE_KP 1.0f
-# define PID_HEAVE_KI 1.0f
-# define PID_HEAVE_KD 1.0f
-# define PID_HEAVE_OUT_MIN 1.0f
-# define PID_HEAVE_OUT_MAX 1.0f
-# define PID_HEAVE_INT_MIN 1.0f
-# define PID_HEAVE_INT_MAX 1.0f
+# define PID_HEAVE_POS_KP 1.0f
+# define PID_HEAVE_POS_KI 1.0f
+# define PID_HEAVE_POS_KD 1.0f
+# define PID_HEAVE_POS_OUT_MIN 1.0f
+# define PID_HEAVE_POS_OUT_MAX 1.0f
+# define PID_HEAVE_POS_INT_MIN 1.0f
+# define PID_HEAVE_POS_INT_MAX 1.0f
 
-# define PID_SWAY_KP 1.0f
-# define PID_SWAY_KI 1.0f
-# define PID_SWAY_KD 1.0f
-# define PID_SWAY_OUT_MIN 1.0f
-# define PID_SWAY_OUT_MAX 1.0f
-# define PID_SWAY_INT_MIN 1.0f
-# define PID_SWAY_INT_MAX 1.0f
+# define PID_SWAY_POS_KP 1.0f
+# define PID_SWAY_POS_KI 1.0f
+# define PID_SWAY_POS_KD 1.0f
+# define PID_SWAY_POS_OUT_MIN 1.0f
+# define PID_SWAY_POS_OUT_MAX 1.0f
+# define PID_SWAY_POS_INT_MIN 1.0f
+# define PID_SWAY_POS_INT_MAX 1.0f
 
-# define PID_SURGE_KP 1.0f
-# define PID_SURGE_KI 1.0f
-# define PID_SURGE_KD 1.0f
-# define PID_SURGE_OUT_MIN 1.0f
-# define PID_SURGE_OUT_MAX 1.0f
-# define PID_SURGE_INT_MIN 1.0f
-# define PID_SURGE_INT_MAX 1.0f
+# define PID_SURGE_POS_KP 1.0f
+# define PID_SURGE_POS_KI 1.0f
+# define PID_SURGE_POS_KD 1.0f
+# define PID_SURGE_POS_OUT_MIN 1.0f
+# define PID_SURGE_POS_OUT_MAX 1.0f
+# define PID_SURGE_POS_INT_MIN 1.0f
+# define PID_SURGE_POS_INT_MAX 1.0f
+
+# define PID_HEAVE_VEL_KP 1.0f
+# define PID_HEAVE_VEL_KI 1.0f
+# define PID_HEAVE_VEL_KD 1.0f
+# define PID_HEAVE_VEL_OUT_MIN 1.0f
+# define PID_HEAVE_VEL_OUT_MAX 1.0f
+# define PID_HEAVE_VEL_INT_MIN 1.0f
+# define PID_HEAVE_VEL_INT_MAX 1.0f
+
+# define PID_SWAY_VEL_KP 1.0f
+# define PID_SWAY_VEL_KI 1.0f
+# define PID_SWAY_VEL_KD 1.0f
+# define PID_SWAY_VEL_OUT_MIN 1.0f
+# define PID_SWAY_VEL_OUT_MAX 1.0f
+# define PID_SWAY_VEL_INT_MIN 1.0f
+# define PID_SWAY_VEL_INT_MAX 1.0f
+
+# define PID_SURGE_VEL_KP 1.0f
+# define PID_SURGE_VEL_KI 1.0f
+# define PID_SURGE_VEL_KD 1.0f
+# define PID_SURGE_VEL_OUT_MIN 1.0f
+# define PID_SURGE_VEL_OUT_MAX 1.0f
+# define PID_SURGE_VEL_INT_MIN 1.0f
+# define PID_SURGE_VEL_INT_MAX 1.0f
 
 # define PID_ROLL_KP 1.0f
 # define PID_ROLL_KI 1.0f
@@ -262,37 +286,33 @@
 
 // Control Tune Start
 
-# define CONTROL_FIN_RADIUS 0.12f
+# define CONTROL_FIN_RADIUS 0.085f
+# define CONTROL_FIN_COUNT 4
 
 # define CONTROL_FIN_1_START 0
 # define CONTROL_FIN_1_FINISH 0
-# define CONTROL_FIN_1_US_MIN 1000
-# define CONTROL_FIN_1_US_MAX 2000
-# define CONTROL_FIN_1_PERIOD 8400
+# define CONTROL_FIN_1_US_MIN 900
+# define CONTROL_FIN_1_US_MAX 2100
 
 # define CONTROL_FIN_2_START 0
 # define CONTROL_FIN_2_FINISH 0
-# define CONTROL_FIN_2_US_MIN 1000
-# define CONTROL_FIN_2_US_MAX 2000
-# define CONTROL_FIN_2_PERIOD 8400
+# define CONTROL_FIN_2_US_MIN 900
+# define CONTROL_FIN_2_US_MAX 2100
 
 # define CONTROL_FIN_3_START 0
 # define CONTROL_FIN_3_FINISH 0
-# define CONTROL_FIN_3_US_MIN 1000
-# define CONTROL_FIN_3_US_MAX 2000
-# define CONTROL_FIN_3_PERIOD 8400
+# define CONTROL_FIN_3_US_MIN 900
+# define CONTROL_FIN_3_US_MAX 2100
 
 # define CONTROL_FIN_4_START 0
 # define CONTROL_FIN_4_FINISH 0
-# define CONTROL_FIN_4_US_MIN 1000
-# define CONTROL_FIN_4_US_MAX 2000
-# define CONTROL_FIN_4_PERIOD 8400
+# define CONTROL_FIN_4_US_MIN 900
+# define CONTROL_FIN_4_US_MAX 2100
 
 # define CONTROL_ULTRAS_START 1000
 # define CONTROL_ULTRAS_FINISH 1000
 # define CONTROL_ULTRAS_PULSE_MIN 1000
 # define CONTROL_ULTRAS_PULSE_MAX 2000
-# define CONTROL_ULTRAS_PERIOD 20000
 
 #define CONTROL_GAIN_SURGE 1.0f
 #define CONTROL_GAIN_HEAVE 1.0f
@@ -305,9 +325,12 @@
 
 typedef struct s_dof
 {
-	t_pid	pid_heave;
-	t_pid	pid_sway;
-	t_pid	pid_surge;
+	t_pid	pid_heave_pos;
+	t_pid	pid_sway_pos;
+	t_pid	pid_surge_pos;
+	t_pid	pid_heave_vel;
+	t_pid	pid_sway_vel;
+	t_pid	pid_surge_vel;
 	t_pid	pid_roll;
 	t_pid	pid_pitch;
 	t_pid	pid_yaw;

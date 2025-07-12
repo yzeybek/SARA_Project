@@ -21,32 +21,59 @@ void	sara_init_dof(t_dof *sara_dof)
 {
 	float pid_values[7];
 
-	pid_values[0] = PID_HEAVE_KP;
-	pid_values[1] = PID_HEAVE_KI;
-	pid_values[2] = PID_HEAVE_KD;
-	pid_values[3] = PID_HEAVE_OUT_MIN;
-	pid_values[4] = PID_HEAVE_OUT_MAX;
-	pid_values[5] = PID_HEAVE_INT_MIN;
-	pid_values[6] = PID_HEAVE_INT_MAX;
-	pid_init(&sara_dof->pid_heave, pid_values);
+	pid_values[0] = PID_HEAVE_POS_KP;
+	pid_values[1] = PID_HEAVE_POS_KI;
+	pid_values[2] = PID_HEAVE_POS_KD;
+	pid_values[3] = PID_HEAVE_POS_OUT_MIN;
+	pid_values[4] = PID_HEAVE_POS_OUT_MAX;
+	pid_values[5] = PID_HEAVE_POS_INT_MIN;
+	pid_values[6] = PID_HEAVE_POS_INT_MAX;
+	pid_init(&sara_dof->pid_heave_pos, pid_values);
 
-	pid_values[0] = PID_SWAY_KP;
-	pid_values[1] = PID_SWAY_KI;
-	pid_values[2] = PID_SWAY_KD;
-	pid_values[3] = PID_SWAY_OUT_MIN;
-	pid_values[4] = PID_SWAY_OUT_MAX;
-	pid_values[5] = PID_SWAY_INT_MIN;
-	pid_values[6] = PID_SWAY_INT_MAX;
-	pid_init(&sara_dof->pid_sway, pid_values);
+	pid_values[0] = PID_SWAY_POS_KP;
+	pid_values[1] = PID_SWAY_POS_KI;
+	pid_values[2] = PID_SWAY_POS_KD;
+	pid_values[3] = PID_SWAY_POS_OUT_MIN;
+	pid_values[4] = PID_SWAY_POS_OUT_MAX;
+	pid_values[5] = PID_SWAY_POS_INT_MIN;
+	pid_values[6] = PID_SWAY_POS_INT_MAX;
+	pid_init(&sara_dof->pid_sway_pos, pid_values);
 
-	pid_values[0] = PID_SURGE_KP;
-	pid_values[1] = PID_SURGE_KI;
-	pid_values[2] = PID_SURGE_KD;
-	pid_values[3] = PID_SURGE_OUT_MIN;
-	pid_values[4] = PID_SURGE_OUT_MAX;
-	pid_values[5] = PID_SURGE_INT_MIN;
-	pid_values[6] = PID_SURGE_INT_MAX;
-	pid_init(&sara_dof->pid_surge, pid_values);
+	pid_values[0] = PID_SURGE_POS_KP;
+	pid_values[1] = PID_SURGE_POS_KI;
+	pid_values[2] = PID_SURGE_POS_KD;
+	pid_values[3] = PID_SURGE_POS_OUT_MIN;
+	pid_values[4] = PID_SURGE_POS_OUT_MAX;
+	pid_values[5] = PID_SURGE_POS_INT_MIN;
+	pid_values[6] = PID_SURGE_POS_INT_MAX;
+	pid_init(&sara_dof->pid_surge_pos, pid_values);
+
+	pid_values[0] = PID_HEAVE_VEL_KP;
+	pid_values[1] = PID_HEAVE_VEL_KI;
+	pid_values[2] = PID_HEAVE_VEL_KD;
+	pid_values[3] = PID_HEAVE_VEL_OUT_MIN;
+	pid_values[4] = PID_HEAVE_VEL_OUT_MAX;
+	pid_values[5] = PID_HEAVE_VEL_INT_MIN;
+	pid_values[6] = PID_HEAVE_VEL_INT_MAX;
+	pid_init(&sara_dof->pid_heave_vel, pid_values);
+
+	pid_values[0] = PID_SWAY_VEL_KP;
+	pid_values[1] = PID_SWAY_VEL_KI;
+	pid_values[2] = PID_SWAY_VEL_KD;
+	pid_values[3] = PID_SWAY_VEL_OUT_MIN;
+	pid_values[4] = PID_SWAY_VEL_OUT_MAX;
+	pid_values[5] = PID_SWAY_VEL_INT_MIN;
+	pid_values[6] = PID_SWAY_VEL_INT_MAX;
+	pid_init(&sara_dof->pid_sway_vel, pid_values);
+
+	pid_values[0] = PID_SURGE_VEL_KP;
+	pid_values[1] = PID_SURGE_VEL_KI;
+	pid_values[2] = PID_SURGE_VEL_KD;
+	pid_values[3] = PID_SURGE_VEL_OUT_MIN;
+	pid_values[4] = PID_SURGE_VEL_OUT_MAX;
+	pid_values[5] = PID_SURGE_VEL_INT_MIN;
+	pid_values[6] = PID_SURGE_VEL_INT_MAX;
+	pid_init(&sara_dof->pid_surge_vel, pid_values);
 
 	pid_values[0] = PID_ROLL_KP;
 	pid_values[1] = PID_ROLL_KI;
@@ -385,11 +412,12 @@ void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeD
 
 void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
 {
-	d646wp_init(&control->fin_1, htim_fin, TIM_CHANNEL_1, CONTROL_FIN_1_US_MIN, CONTROL_FIN_1_US_MAX, CONTROL_FIN_1_PERIOD);
-	d646wp_init(&control->fin_2, htim_fin, TIM_CHANNEL_2, CONTROL_FIN_2_US_MIN, CONTROL_FIN_2_US_MAX, CONTROL_FIN_2_PERIOD);
-	d646wp_init(&control->fin_3, htim_fin, TIM_CHANNEL_3, CONTROL_FIN_3_US_MIN, CONTROL_FIN_3_US_MAX, CONTROL_FIN_3_PERIOD);
-	d646wp_init(&control->fin_4, htim_fin, TIM_CHANNEL_4, CONTROL_FIN_4_US_MIN, CONTROL_FIN_4_US_MAX, CONTROL_FIN_4_PERIOD);
-	ultras_init(&control->ultras, htim_ultras, TIM_CHANNEL_1, CONTROL_ULTRAS_PULSE_MIN, CONTROL_ULTRAS_PULSE_MAX, CONTROL_ULTRAS_PERIOD);
+	d646wp_init(&control->fin_1, htim_fin, TIM_CHANNEL_1, CONTROL_FIN_1_US_MIN, CONTROL_FIN_1_US_MAX);
+	d646wp_init(&control->fin_2, htim_fin, TIM_CHANNEL_2, CONTROL_FIN_2_US_MIN, CONTROL_FIN_2_US_MAX);
+	d646wp_init(&control->fin_3, htim_fin, TIM_CHANNEL_3, CONTROL_FIN_3_US_MIN, CONTROL_FIN_3_US_MAX);
+	d646wp_init(&control->fin_4, htim_fin, TIM_CHANNEL_4, CONTROL_FIN_4_US_MIN, CONTROL_FIN_4_US_MAX);
+	ultras_init(&control->ultras, htim_ultras, TIM_CHANNEL_1, CONTROL_ULTRAS_PULSE_MIN, CONTROL_ULTRAS_PULSE_MAX);
+	ultras_update(&control->ultras, CONTROL_ULTRAS_START);
 }
 
 void	sara_update(t_sara *sara)
@@ -432,12 +460,27 @@ void	sara_update(t_sara *sara)
 		state_next[6] = (sara->sara_states[sara->sara_state].eul_x.start + sara->sara_states[sara->sara_state].eul_x.end) / 2;
 		state_next[7] = (sara->sara_states[sara->sara_state].eul_y.start + sara->sara_states[sara->sara_state].eul_y.end) / 2;
 		state_next[8] = (sara->sara_states[sara->sara_state].eul_z.start + sara->sara_states[sara->sara_state].eul_z.end) / 2;
-//		commands[0] = pid_update(&sara->sara_dof.pid_surge, state_next[3] - state_curr[3], dt);
-//		commands[1] = pid_update(&sara->sara_dof.pid_sway, state_next[4] - state_curr[4], dt);
-//		commands[2] = pid_update(&sara->sara_dof.pid_heave, state_next[5] - state_curr[5], dt);
-//		commands[3] = wrap_pi(pid_update(&sara->sara_dof.pid_roll, state_next[6] - state_curr[6], dt));
-//		commands[4] = wrap_pi(pid_update(&sara->sara_dof.pid_pitch, state_next[7] - state_curr[7], dt));
-//		commands[5] = wrap_pi(pid_update(&sara->sara_dof.pid_yaw, state_next[8] - state_curr[8], dt));
+		commands[0] = pid_update(&sara->sara_dof.pid_surge_vel, pid_update(&sara->sara_dof.pid_surge_pos, state_next[0] - state_curr[0], dt) - state_curr[3], dt);
+		commands[1] = pid_update(&sara->sara_dof.pid_sway_vel, pid_update(&sara->sara_dof.pid_sway_pos, state_next[1] - state_curr[1], dt) - state_curr[4], dt);
+		commands[2] = pid_update(&sara->sara_dof.pid_heave_vel, pid_update(&sara->sara_dof.pid_heave_pos, state_next[2] - state_curr[2], dt) - state_curr[5], dt);
+		commands[3] = wrap_pi(pid_update(&sara->sara_dof.pid_roll, state_next[6] - state_curr[6], dt));
+		commands[4] = wrap_pi(pid_update(&sara->sara_dof.pid_pitch, state_next[7] - state_curr[7], dt));
+		commands[5] = wrap_pi(pid_update(&sara->sara_dof.pid_yaw, state_next[8] - state_curr[8], dt));
+		write_buf[5] = CONTROL_GAIN_SURGE * commands[0];
+		for (int i = 0; i < CONTROL_FIN_COUNT; i++)
+		{
+			float c = cosf(flap_theta[i]);
+			float s = sinf(flap_theta[i]);
+			float F_sway = CONTROL_GAIN_SWAY * commands[1] * c;
+			float F_heave = CONTROL_GAIN_HEAVE * commands[2] * s;
+			float M_roll = CONTROL_GAIN_ROLL * commands[3] / CONTROL_FIN_RADIUS;
+			float M_pitch = CONTROL_GAIN_PITCH * commands[4] / CONTROL_FIN_RADIUS;
+			float M_yaw = CONTROL_GAIN_YAW * commands[5] / CONTROL_FIN_RADIUS;
+			float F_roll = M_roll * s;
+			float F_pitch = M_pitch * c;
+			float F_yaw = M_yaw * c;
+			write_buf[i] = F_heave + F_sway + F_roll + F_pitch + F_yaw;
+		}
 	}
 	else
 	{

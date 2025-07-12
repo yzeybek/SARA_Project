@@ -16,11 +16,10 @@ typedef struct s_ultras
 	int					min_pulse;
 	int					max_pulse;
 	int					channel;
-	int					period;
 
 } t_ultras;
 
-void	ultras_init(t_ultras *ultras, TIM_HandleTypeDef *htim, int min_pulse, int max_pulse, int channel, int period);
+void	ultras_init(t_ultras *ultras, TIM_HandleTypeDef *htim, int min_pulse, int max_pulse, int channel);
 void	ultras_update(t_ultras *ultras, int pulse);
 
 #endif /* SARA_INC_ULTRAS_H_ */
