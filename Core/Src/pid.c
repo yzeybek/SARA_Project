@@ -7,8 +7,10 @@
 
 #include "pid.h"
 
-void pid_init(t_pid *pid, float pid_values[7])
+uint16_t pid_init(t_pid *pid, float pid_values[7])
 {
+	if (!pid || !pid_values)
+		return (PID_STAT_ERR_SELF_NULL_PTR);
     pid->Kp = pid_values[0];
     pid->Ki = pid_values[1];
     pid->Kd = pid_values[2];
@@ -18,6 +20,7 @@ void pid_init(t_pid *pid, float pid_values[7])
     pid->int_max = pid_values[6];
     pid->integrator = 0.0f;
     pid->prev_error = FLT_MAX;
+    return (PID_STAT_OK);
 }
 
 float	pid_update(t_pid *pid, float error, float dt)

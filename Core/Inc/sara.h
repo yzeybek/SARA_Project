@@ -248,34 +248,34 @@
 # define UKF_MATRIX_X_QUAT_X 0.0f
 # define UKF_MATRIX_X_QUAT_Y 0.0f
 # define UKF_MATRIX_X_QUAT_Z 0.0f
-# define UKF_MATRIX_X_BIAS_ACC_X 0.01f
-# define UKF_MATRIX_X_BIAS_ACC_Y -0.01f
-# define UKF_MATRIX_X_BIAS_ACC_Z 0.02f
-# define UKF_MATRIX_X_BIAS_GYRO_X 0.0005f
-# define UKF_MATRIX_X_BIAS_GYRO_Y 0.0005f
-# define UKF_MATRIX_X_BIAS_GYRO_Z -0.0005f
-# define UKF_MATRIX_X_BIAS_PRESS 0.0f
-# define UKF_MATRIX_X_BIAS_VEL_X 0.0f
-# define UKF_MATRIX_X_BIAS_VEL_Y 0.0f
+# define UKF_MATRIX_X_BIAS_ACC_X 0.08f
+# define UKF_MATRIX_X_BIAS_ACC_Y 0.08f
+# define UKF_MATRIX_X_BIAS_ACC_Z 0.08f
+# define UKF_MATRIX_X_BIAS_GYRO_X 0.03f
+# define UKF_MATRIX_X_BIAS_GYRO_Y 0.03f
+# define UKF_MATRIX_X_BIAS_GYRO_Z 0.03f
+# define UKF_MATRIX_X_BIAS_PRESS 0.05f
+# define UKF_MATRIX_X_BIAS_VEL_X 0.002f
+# define UKF_MATRIX_X_BIAS_VEL_Y 0.002f
 
-# define UKF_MATRIX_P_POS 1.0f
-# define UKF_MATRIX_P_VEL 0.5f
+# define UKF_MATRIX_P_POS 0.005f
+# define UKF_MATRIX_P_VEL 0.02f
 # define UKF_MATRIX_P_ACC 0.1f
-# define UKF_MATRIX_P_QUAT (5.0f * (M_PI / 180.0f))
-# define UKF_MATRIX_P_BIAS_ACC 0.49f
-# define UKF_MATRIX_P_BIAS_GYRO 0.01745f
-# define UKF_MATRIX_P_BIAS_PRESS 0.15f
-# define UKF_MATRIX_P_BIAS_VEL_X 0.03f
-# define UKF_MATRIX_P_BIAS_VEL_Y 0.03f
+# define UKF_MATRIX_P_QUAT 0.01f
+# define UKF_MATRIX_P_BIAS_ACC 0.1
+# define UKF_MATRIX_P_BIAS_GYRO 0.05f
+# define UKF_MATRIX_P_BIAS_PRESS 1.0f
+# define UKF_MATRIX_P_BIAS_VEL_X 0.005f
+# define UKF_MATRIX_P_BIAS_VEL_Y 0.005f
 
-# define UKF_MATRIX_R_PRESS 0.8155f
+# define UKF_MATRIX_R_PRESS 0.8f
 # define UKF_MATRIX_R_VEL_X 0.1f
 # define UKF_MATRIX_R_VEL_Y 0.1f
 
 # define UKF_MATRIX_Q_FACT_DYNA 10.0f
 # define UKF_MATRIX_Q_FACT_BIAS 5.0f
-# define UKF_MATRIX_Q_SD_ACC 0.0014715f
-# define UKF_MATRIX_Q_SD_GYRO 0.00024435f
+# define UKF_MATRIX_Q_SD_ACC 0.001f
+# define UKF_MATRIX_Q_SD_GYRO 0.00052f
 # define UKF_MATRIX_Q_SD_BIAS_ACC 0.0005f
 # define UKF_MATRIX_Q_SD_BIAS_GYRO 0.0001f
 # define UKF_MATRIX_Q_SD_BIAS_PRESS 0.0001f
@@ -323,6 +323,55 @@
 
 // Control Tune End
 
+#define SARA_MAKE_STAT(base_stat, sub_stat) \
+  (uint32_t)( \
+      (((uint32_t)(sub_stat) & 0xFFFF) << 8) \
+    |  ((uint32_t)(base_stat) & 0xFF)        \
+   )
+
+typedef enum e_sara_stat
+{
+	SARA_STAT_OK,
+	SARA_STAT_ERR_SELF_NULL_PTR,
+	SARA_STAT_ERR_PID_INIT_1,
+	SARA_STAT_ERR_PID_INIT_2,
+	SARA_STAT_ERR_PID_INIT_3,
+	SARA_STAT_ERR_PID_INIT_4,
+	SARA_STAT_ERR_PID_INIT_5,
+	SARA_STAT_ERR_PID_INIT_6,
+	SARA_STAT_ERR_PID_INIT_7,
+	SARA_STAT_ERR_PID_INIT_8,
+	SARA_STAT_ERR_PID_INIT_9,
+	SARA_STAT_ERR_STATE_INIT_1,
+	SARA_STAT_ERR_STATE_INIT_2,
+	SARA_STAT_ERR_STATE_INIT_3,
+	SARA_STAT_ERR_STATE_INIT_4,
+	SARA_STAT_ERR_STATE_INIT_5,
+	SARA_STAT_ERR_STATE_INIT_6,
+	SARA_STAT_ERR_STATE_INIT_7,
+	SARA_STAT_ERR_UKF_NULL_INIT,
+	SARA_STAT_ERR_DVL650_INIT,
+	SARA_STAT_ERR_BNO055_INIT,
+	SARA_STAT_ERR_BNO055_UNIT,
+	SARA_STAT_ERR_SEN0257_INIT,
+	SARA_STAT_ERR_D646WP_INIT_1,
+	SARA_STAT_ERR_D646WP_INIT_2,
+	SARA_STAT_ERR_D646WP_INIT_3,
+	SARA_STAT_ERR_D646WP_INIT_4,
+	SARA_STAT_ERR_ULTRAS_INIT,
+	SARA_STAT_ERR_BNO055_READ_ACCEL,
+	SARA_STAT_ERR_BNO055_READ_GYRO,
+	SARA_STAT_ERR_SEN0257_READ,
+	SARA_STAT_ERR_DVL650_READ,
+	SARA_STAT_ERR_UKF_UPDATE,
+	SARA_STAT_ERR_D646WP_WRITE_1,
+	SARA_STAT_ERR_D646WP_WRITE_2,
+	SARA_STAT_ERR_D646WP_WRITE_3,
+	SARA_STAT_ERR_D646WP_WRITE_4,
+	SARA_STAT_ERR_ULTRAS_WRITE,
+
+} t_sara_stat;
+
 typedef struct s_dof
 {
 	t_pid	pid_heave_pos;
@@ -366,15 +415,15 @@ typedef struct s_sara
 
 } t_sara;
 
-void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras);
-void	sara_init_dof(t_dof *sara_dof);
-void	sara_init_state(t_state sara_states[STATE_COUNT]);
-void	sara_init_ukf(t_ukf *sara_ukf);
-void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
-void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras);
+uint32_t	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras);
+uint32_t	sara_init_dof(t_dof *sara_dof);
+uint32_t	sara_init_state(t_state sara_states[STATE_COUNT]);
+uint32_t	sara_init_ukf(t_ukf *sara_ukf);
+uint32_t	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc);
+uint32_t	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras);
 
-void	sara_update(t_sara *sara);
-void	sara_update_read(t_sensor *sensor, float read_buf[9]);
-void	sara_update_write(t_control *control, float write_buf[5]);
+uint32_t	sara_update(t_sara *sara);
+uint32_t	sara_update_read(t_sensor *sensor, float read_buf[9]);
+uint32_t	sara_update_write(t_control *control, float write_buf[5]);
 
 #endif /* INC_SARA_H_ */

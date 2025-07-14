@@ -49,7 +49,7 @@ void	integrate_quat(const float in_q[4], const float omega[3], float dt, float o
     arm_quaternion_normalize_f32(tmp, out_q, 1);
 }
 
-void	arm_matrix_identity_f32(arm_matrix_instance_f32* p_mat, int size)
+void	matrix_identity(arm_matrix_instance_f32* p_mat, int size)
 {
     memset(p_mat->pData, 0, size * size * sizeof(float));
     for (int i = 0; i < size; i++)

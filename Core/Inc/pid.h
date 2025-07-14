@@ -8,7 +8,15 @@
 #ifndef INC_PID_H_
 #define INC_PID_H_
 
-#include <float.h>
+# include "stdint.h"
+# include "float.h"
+
+typedef enum e_pid_stat
+{
+	PID_STAT_OK,
+	PID_STAT_ERR_SELF_NULL_PTR,
+
+} t_pid_stat;
 
 typedef struct s_pid
 {
@@ -24,7 +32,7 @@ typedef struct s_pid
 
 }	t_pid;
 
-void	pid_init(t_pid *pid, float pid_values[7]);
-float	pid_update(t_pid *pid, float error, float dt);
+uint16_t	pid_init(t_pid *pid, float pid_values[7]);
+float		pid_update(t_pid *pid, float error, float dt);
 
 #endif /* INC_PID_H_ */

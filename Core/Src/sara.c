@@ -7,20 +7,36 @@
 
 #include "sara.h"
 
-void	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
+uint32_t	sara_init(t_sara *sara, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
 {
-	sara_init_dof(&sara->sara_dof);
-	sara_init_state(sara->sara_states);
+	uint32_t	stat;
+
+	if (!sara || !hi2c || !hadc || !htim_fin || !htim_ultras)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
+	stat = sara_init_dof(&sara->sara_dof);
+	if (stat != SARA_STAT_OK)
+		return (stat);
+	stat = sara_init_state(sara->sara_states);
+	if (stat != SARA_STAT_OK)
+		return (stat);
 	sara->sara_state = 0;
-	sara_init_ukf(&sara->sara_ukf);
-	sara_init_sensor(&sara->sara_sensor, hi2c, hadc);
+	stat = sara_init_ukf(&sara->sara_ukf);
+	if (stat != SARA_STAT_OK)
+		return (stat);
+	stat = sara_init_sensor(&sara->sara_sensor, hi2c, hadc);
+	if (stat != SARA_STAT_OK)
+		return (stat);
 	sara_init_control(&sara->sara_control, htim_fin, htim_ultras);
+	return (SARA_STAT_OK);
 }
 
-void	sara_init_dof(t_dof *sara_dof)
+uint32_t	sara_init_dof(t_dof *sara_dof)
 {
-	float pid_values[7];
+	uint16_t	stat;
+	float 		pid_values[7];
 
+	if (!sara_dof)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
 	pid_values[0] = PID_HEAVE_POS_KP;
 	pid_values[1] = PID_HEAVE_POS_KI;
 	pid_values[2] = PID_HEAVE_POS_KD;
@@ -28,7 +44,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_HEAVE_POS_OUT_MAX;
 	pid_values[5] = PID_HEAVE_POS_INT_MIN;
 	pid_values[6] = PID_HEAVE_POS_INT_MAX;
-	pid_init(&sara_dof->pid_heave_pos, pid_values);
+	stat = pid_init(&sara_dof->pid_heave_pos, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_1, stat));
 
 	pid_values[0] = PID_SWAY_POS_KP;
 	pid_values[1] = PID_SWAY_POS_KI;
@@ -37,7 +55,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_SWAY_POS_OUT_MAX;
 	pid_values[5] = PID_SWAY_POS_INT_MIN;
 	pid_values[6] = PID_SWAY_POS_INT_MAX;
-	pid_init(&sara_dof->pid_sway_pos, pid_values);
+	stat = pid_init(&sara_dof->pid_sway_pos, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_2, stat));
 
 	pid_values[0] = PID_SURGE_POS_KP;
 	pid_values[1] = PID_SURGE_POS_KI;
@@ -46,7 +66,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_SURGE_POS_OUT_MAX;
 	pid_values[5] = PID_SURGE_POS_INT_MIN;
 	pid_values[6] = PID_SURGE_POS_INT_MAX;
-	pid_init(&sara_dof->pid_surge_pos, pid_values);
+	stat = pid_init(&sara_dof->pid_surge_pos, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_3, stat));
 
 	pid_values[0] = PID_HEAVE_VEL_KP;
 	pid_values[1] = PID_HEAVE_VEL_KI;
@@ -55,7 +77,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_HEAVE_VEL_OUT_MAX;
 	pid_values[5] = PID_HEAVE_VEL_INT_MIN;
 	pid_values[6] = PID_HEAVE_VEL_INT_MAX;
-	pid_init(&sara_dof->pid_heave_vel, pid_values);
+	stat = pid_init(&sara_dof->pid_heave_vel, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_4, stat));
 
 	pid_values[0] = PID_SWAY_VEL_KP;
 	pid_values[1] = PID_SWAY_VEL_KI;
@@ -64,7 +88,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_SWAY_VEL_OUT_MAX;
 	pid_values[5] = PID_SWAY_VEL_INT_MIN;
 	pid_values[6] = PID_SWAY_VEL_INT_MAX;
-	pid_init(&sara_dof->pid_sway_vel, pid_values);
+	stat = pid_init(&sara_dof->pid_sway_vel, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_5, stat));
 
 	pid_values[0] = PID_SURGE_VEL_KP;
 	pid_values[1] = PID_SURGE_VEL_KI;
@@ -73,7 +99,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_SURGE_VEL_OUT_MAX;
 	pid_values[5] = PID_SURGE_VEL_INT_MIN;
 	pid_values[6] = PID_SURGE_VEL_INT_MAX;
-	pid_init(&sara_dof->pid_surge_vel, pid_values);
+	stat = pid_init(&sara_dof->pid_surge_vel, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_6, stat));
 
 	pid_values[0] = PID_ROLL_KP;
 	pid_values[1] = PID_ROLL_KI;
@@ -82,7 +110,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_ROLL_OUT_MAX;
 	pid_values[5] = PID_ROLL_INT_MIN;
 	pid_values[6] = PID_ROLL_INT_MAX;
-	pid_init(&sara_dof->pid_roll, pid_values);
+	stat = pid_init(&sara_dof->pid_roll, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_7, stat));
 
 	pid_values[0] = PID_PITCH_KP;
 	pid_values[1] = PID_PITCH_KI;
@@ -91,7 +121,9 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_PITCH_OUT_MAX;
 	pid_values[5] = PID_PITCH_INT_MIN;
 	pid_values[6] = PID_PITCH_INT_MAX;
-	pid_init(&sara_dof->pid_pitch, pid_values);
+	stat = pid_init(&sara_dof->pid_pitch, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_8, stat));
 
 	pid_values[0] = PID_YAW_KP;
 	pid_values[1] = PID_YAW_KI;
@@ -100,13 +132,19 @@ void	sara_init_dof(t_dof *sara_dof)
 	pid_values[4] = PID_YAW_OUT_MAX;
 	pid_values[5] = PID_YAW_INT_MIN;
 	pid_values[6] = PID_YAW_INT_MAX;
-	pid_init(&sara_dof->pid_yaw, pid_values);
+	stat = pid_init(&sara_dof->pid_yaw, pid_values);
+	if (stat != PID_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_PID_INIT_9, stat));
+	return (SARA_STAT_OK);
 }
 
-void	sara_init_state(t_state sara_states[STATE_COUNT])
+uint32_t	sara_init_state(t_state sara_states[STATE_COUNT])
 {
-	t_range	state_ranges[9];
+	uint16_t	stat;
+	t_range		state_ranges[9];
 
+	if (!sara_states)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
 	if (STATE_COUNT >= 1)
 	{
 		state_ranges[0].start = STATE_1_POS_X_START;
@@ -127,9 +165,10 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_1_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_1_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_1_EUL_Z_END);
-		state_init(&sara_states[0], state_ranges);
+		stat = state_init(&sara_states[0], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_1, stat));
 	}
-
 	if (STATE_COUNT >= 2)
 	{
 		state_ranges[0].start = STATE_2_POS_X_START;
@@ -150,9 +189,10 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_2_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_2_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_2_EUL_Z_END);
-		state_init(&sara_states[1], state_ranges);
+		stat = state_init(&sara_states[1], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_2, stat));
 	}
-
 	if (STATE_COUNT >= 3)
 	{
 		state_ranges[0].start = STATE_3_POS_X_START;
@@ -173,9 +213,10 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_3_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_3_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_3_EUL_Z_END);
-		state_init(&sara_states[2], state_ranges);
+		stat = state_init(&sara_states[2], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_3, stat));
 	}
-
 	if (STATE_COUNT >= 4)
 	{
 		state_ranges[0].start = STATE_4_POS_X_START;
@@ -196,9 +237,10 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_4_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_4_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_4_EUL_Z_END);
-		state_init(&sara_states[3], state_ranges);
+		stat = state_init(&sara_states[3], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_4, stat));
 	}
-
 	if (STATE_COUNT >= 5)
 	{
 		state_ranges[0].start = STATE_5_POS_X_START;
@@ -219,9 +261,10 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_5_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_5_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_5_EUL_Z_END);
-		state_init(&sara_states[4], state_ranges);
+		stat = state_init(&sara_states[4], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_5, stat));
 	}
-
 	if (STATE_COUNT >= 6)
 	{
 		state_ranges[0].start = STATE_6_POS_X_START;
@@ -242,9 +285,10 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_6_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_6_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_6_EUL_Z_END);
-		state_init(&sara_states[5], state_ranges);
+		stat = state_init(&sara_states[5], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_6, stat));
 	}
-
 	if (STATE_COUNT >= 7)
 	{
 		state_ranges[0].start = STATE_7_POS_X_START;
@@ -265,8 +309,11 @@ void	sara_init_state(t_state sara_states[STATE_COUNT])
 		state_ranges[7].end = wrap_degree(STATE_7_EUL_Y_END);
 		state_ranges[8].start = wrap_degree(STATE_7_EUL_Z_START);
 		state_ranges[8].end = wrap_degree(STATE_7_EUL_Z_END);
-		state_init(&sara_states[6], state_ranges);
+		stat = state_init(&sara_states[6], state_ranges);
+		if (stat != STATE_STAT_OK)
+			return (SARA_MAKE_STAT(SARA_STAT_ERR_STATE_INIT_7, stat));
 	}
+	return (SARA_STAT_OK);
 }
 
 void	sara_ukf_f(float ukf_matrix_x[UKF_SIZE_STATE], float ukf_matrix_u[UKF_SIZE_INPUT], float ukf_matrix_x_new[UKF_SIZE_STATE], float dt)
@@ -337,13 +384,16 @@ void	sara_ukf_h(float ukf_matrix_x[UKF_SIZE_STATE], float ukf_matrix_z[UKF_SIZE_
 	ukf_matrix_z[2] = v_b[1];
 }
 
-void	sara_init_ukf(t_ukf *sara_ukf)
+uint32_t	sara_init_ukf(t_ukf *sara_ukf)
 {
-	float	ukf_matrix_p[UKF_SIZE_STATE][UKF_SIZE_STATE] = {0};
-	float	ukf_matrix_q[UKF_SIZE_STATE][UKF_SIZE_STATE] = {0};
-	float	ukf_matrix_r[UKF_SIZE_MEAS][UKF_SIZE_MEAS] = {0};
-	float	ukf_matrix_x[UKF_SIZE_STATE] = {0};
+	uint16_t	stat;
+	float		ukf_matrix_p[UKF_SIZE_STATE][UKF_SIZE_STATE] = {0};
+	float		ukf_matrix_q[UKF_SIZE_STATE][UKF_SIZE_STATE] = {0};
+	float		ukf_matrix_r[UKF_SIZE_MEAS][UKF_SIZE_MEAS] = {0};
+	float		ukf_matrix_x[UKF_SIZE_STATE] = {0};
 
+	if (!sara_ukf)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
 	ukf_matrix_x[0] = UKF_MATRIX_X_POS_X;
 	ukf_matrix_x[1] = UKF_MATRIX_X_POS_Y;
 	ukf_matrix_x[2] = UKF_MATRIX_X_POS_Z;
@@ -398,29 +448,58 @@ void	sara_init_ukf(t_ukf *sara_ukf)
 	ukf_matrix_q[19][19] = UKF_MATRIX_Q_SD_BIAS_PRESS * UKF_MATRIX_Q_SD_BIAS_PRESS;
 	ukf_matrix_q[20][20] = UKF_MATRIX_Q_SD_BIAS_VEL_X * UKF_MATRIX_Q_SD_BIAS_VEL_X;
 	ukf_matrix_q[21][21] = UKF_MATRIX_Q_SD_BIAS_VEL_Y * UKF_MATRIX_Q_SD_BIAS_VEL_Y;
-
-	ukf_init(sara_ukf, ukf_matrix_x, ukf_matrix_p, ukf_matrix_q, ukf_matrix_r, sara_ukf_f, sara_ukf_h);
+	stat = ukf_init(sara_ukf, ukf_matrix_x, ukf_matrix_p, ukf_matrix_q, ukf_matrix_r, sara_ukf_f, sara_ukf_h);
+	if (stat != UKF_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_UKF_NULL_INIT, stat));
+	return (SARA_STAT_OK);
 }
 
-void	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc)
+uint32_t	sara_init_sensor(t_sensor *sensor, I2C_HandleTypeDef *hi2c, ADC_HandleTypeDef *hadc)
 {
-	sensor->bno055 = (t_bno055){ .i2c = hi2c, .addr = BNO055_ADDR, .opr_mode = BNO055_OPR_MODE_IMU };
-	bno055_init(&sensor->bno055);
-	bno055_set_unit(&sensor->bno055, BNO055_GYRO_UNIT_DPS, BNO055_ACCEL_UNITSEL_M_S2, BNO055_EUL_UNIT_DEG);
-	sen0257_init(&sensor->sen0257, hadc);
+	uint16_t	stat;
+
+	if (!sensor || !hi2c || !hadc)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
+	stat = bno055_init(&sensor->bno055, hi2c);
+	if (stat != BNO055_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_BNO055_INIT, stat));
+	stat = bno055_set_unit(&sensor->bno055, BNO055_GYRO_UNIT_DPS, BNO055_ACCEL_UNITSEL_M_S2, BNO055_EUL_UNIT_DEG);
+	if (stat != BNO055_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_BNO055_UNIT, stat));
+	stat = sen0257_init(&sensor->sen0257, hadc);
+	if (stat != SEN0257_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_SEN0257_INIT, stat));
+	stat = dvl650_init(&sensor->dvl650);
+	if (stat != DVL650_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_DVL650_INIT, stat));
+	return (SARA_STAT_OK);
 }
 
-void	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
+uint32_t	sara_init_control(t_control *control, TIM_HandleTypeDef *htim_fin, TIM_HandleTypeDef *htim_ultras)
 {
-	d646wp_init(&control->fin_1, htim_fin, TIM_CHANNEL_1, CONTROL_FIN_1_US_MIN, CONTROL_FIN_1_US_MAX);
-	d646wp_init(&control->fin_2, htim_fin, TIM_CHANNEL_2, CONTROL_FIN_2_US_MIN, CONTROL_FIN_2_US_MAX);
-	d646wp_init(&control->fin_3, htim_fin, TIM_CHANNEL_3, CONTROL_FIN_3_US_MIN, CONTROL_FIN_3_US_MAX);
-	d646wp_init(&control->fin_4, htim_fin, TIM_CHANNEL_4, CONTROL_FIN_4_US_MIN, CONTROL_FIN_4_US_MAX);
-	ultras_init(&control->ultras, htim_ultras, TIM_CHANNEL_1, CONTROL_ULTRAS_PULSE_MIN, CONTROL_ULTRAS_PULSE_MAX);
-	ultras_update(&control->ultras, CONTROL_ULTRAS_START);
+	uint16_t	stat;
+
+	if (!control || !htim_fin || !htim_ultras)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
+	stat = d646wp_init(&control->fin_1, htim_fin, TIM_CHANNEL_1, CONTROL_FIN_1_US_MIN, CONTROL_FIN_1_US_MAX);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_INIT_1, stat));
+	stat = d646wp_init(&control->fin_2, htim_fin, TIM_CHANNEL_2, CONTROL_FIN_2_US_MIN, CONTROL_FIN_2_US_MAX);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_INIT_2, stat));
+	stat = d646wp_init(&control->fin_3, htim_fin, TIM_CHANNEL_3, CONTROL_FIN_3_US_MIN, CONTROL_FIN_3_US_MAX);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_INIT_3, stat));
+	stat = d646wp_init(&control->fin_4, htim_fin, TIM_CHANNEL_4, CONTROL_FIN_4_US_MIN, CONTROL_FIN_4_US_MAX);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_INIT_4, stat));
+	stat = ultras_init(&control->ultras, htim_ultras, TIM_CHANNEL_1, CONTROL_ULTRAS_PULSE_MIN, CONTROL_ULTRAS_PULSE_MAX);
+	if (stat != ULTRAS_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_ULTRAS_INIT, stat));
+	return (SARA_STAT_OK);
 }
 
-void	sara_update(t_sara *sara)
+uint32_t	sara_update(t_sara *sara)
 {
 	const float flap_theta[4] = { M_PI/4.0f, 3.0f*M_PI/4.0f, 5.0f*M_PI/4.0f, 7.0f*M_PI/4.0f };
 	float			state_curr[9];
@@ -431,7 +510,11 @@ void	sara_update(t_sara *sara)
 	uint32_t static	last_ms;
 	uint32_t		now_ms;
 	float			dt;
+	uint32_t		stat32;
+	uint16_t		stat16;
 
+	if (!sara)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
 	now_ms = HAL_GetTick();
 	dt = (now_ms - last_ms) * 1e-3f;
 	last_ms = now_ms;
@@ -439,8 +522,12 @@ void	sara_update(t_sara *sara)
 		dt = 1e-3f;
 	if (dt > 0.1f)
 		dt = 1e-3f;
-	sara_update_read(&sara->sara_sensor, read_buf);
-	ukf_update(&sara->sara_ukf, read_buf, dt);
+	stat32 = sara_update_read(&sara->sara_sensor, read_buf);
+	if (stat32 != SARA_STAT_OK)
+		return (stat32);
+	stat16 = ukf_update(&sara->sara_ukf, read_buf, dt);
+	if (stat16 != UKF_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_UKF_UPDATE, stat16));
 	state_curr[0] = sara->sara_ukf.ukf_matrix_x[0];
 	state_curr[1] = sara->sara_ukf.ukf_matrix_x[1];
 	state_curr[2] = sara->sara_ukf.ukf_matrix_x[2];
@@ -490,16 +577,31 @@ void	sara_update(t_sara *sara)
 		write_buf[3] = CONTROL_FIN_4_FINISH;
 		write_buf[4] = CONTROL_ULTRAS_START;
 	}
-	sara_update_write(&sara->sara_control, write_buf);
+	stat32 = sara_update_write(&sara->sara_control, write_buf);
+	if (stat32 != SARA_STAT_OK)
+		return (stat32);
 	HAL_Delay(1);
+	return (SARA_STAT_OK);
 }
 
-void	sara_update_read(t_sensor *sensor, float read_buf[9])
+uint32_t	sara_update_read(t_sensor *sensor, float read_buf[9])
 {
-	bno055_linear_acc(&sensor->bno055, &sensor->bno055.linear_acc);
-	bno055_gyro(&sensor->bno055, &sensor->bno055.gyro);
-	sen0257_update(&sensor->sen0257);
-	dvl650_update(&sensor->dvl650);
+	uint16_t	stat;
+
+	if (!sensor || !read_buf)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
+	stat = bno055_linear_acc(&sensor->bno055, &sensor->bno055.linear_acc);
+	if (stat != BNO055_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_BNO055_READ_ACCEL, stat));
+	stat = bno055_gyro(&sensor->bno055, &sensor->bno055.gyro);
+	if (stat != BNO055_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_BNO055_READ_GYRO, stat));
+	stat = sen0257_update(&sensor->sen0257);
+	if (stat != SEN0257_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_SEN0257_READ, stat));
+	stat = dvl650_update(&sensor->dvl650);
+	if (stat != DVL650_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_DVL650_READ, stat));
 	read_buf[0] = sensor->bno055.linear_acc.x;
 	read_buf[1] = sensor->bno055.linear_acc.y;
 	read_buf[2] = sensor->bno055.linear_acc.z;
@@ -509,13 +611,29 @@ void	sara_update_read(t_sensor *sensor, float read_buf[9])
 	read_buf[6] = sensor->sen0257.pressure;
 	read_buf[7] = sensor->dvl650.vel_x;
 	read_buf[8] = sensor->dvl650.vel_y;
+	return (SARA_STAT_OK);
 }
 
-void	sara_update_write(t_control *control, float write_buf[5])
+uint32_t	sara_update_write(t_control *control, float write_buf[5])
 {
-	d646wp_update(&control->fin_1, write_buf[0]);
-	d646wp_update(&control->fin_2, write_buf[1]);
-	d646wp_update(&control->fin_3, write_buf[2]);
-	d646wp_update(&control->fin_4, write_buf[3]);
-	ultras_update(&control->ultras, write_buf[4]);
+	uint16_t	stat;
+
+	if (!control || !write_buf)
+		return (SARA_STAT_ERR_SELF_NULL_PTR);
+	stat = d646wp_update(&control->fin_1, write_buf[0]);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_WRITE_1, stat));
+	stat = d646wp_update(&control->fin_2, write_buf[1]);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_WRITE_2, stat));
+	stat = d646wp_update(&control->fin_3, write_buf[2]);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_WRITE_3, stat));
+	stat = d646wp_update(&control->fin_4, write_buf[3]);
+	if (stat != D646WP_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_D646WP_WRITE_4, stat));
+	stat = ultras_update(&control->ultras, write_buf[4]);
+	if (stat != ULTRAS_STAT_OK)
+		return (SARA_MAKE_STAT(SARA_STAT_ERR_ULTRAS_WRITE, stat));
+	return (SARA_STAT_OK);
 }

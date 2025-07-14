@@ -7,12 +7,18 @@
 
 #include "dvl650.h"
 
-void	dvl650_init(t_dvl650 *dvl650)
+uint16_t	dvl650_init(t_dvl650 *dvl650)
 {
+	if (!dvl650)
+		return (DVL650_STAT_ERR_SELF_NULL_PTR);
 	(void)dvl650;
+	return (DVL650_STAT_OK);
 }
 
-void	dvl650_update(t_dvl650 *dvl650)
+uint16_t	dvl650_update(t_dvl650 *dvl650)
 {
+	if (!dvl650)
+		return (DVL650_STAT_ERR_SELF_NULL_PTR);
 	(void)dvl650;
+	return (DVL650_STAT_OK);
 }

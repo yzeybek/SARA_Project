@@ -7,8 +7,10 @@
 
 #include "state.h"
 
-void	state_init(t_state *state, t_range state_ranges[9])
+uint16_t	state_init(t_state *state, t_range state_ranges[9])
 {
+	if (!state || !state_ranges)
+		return (STATE_STAT_ERR_SELF_NULL_PTR);
 	state->pos_x = state_ranges[0];
 	state->pos_y = state_ranges[1];
 	state->pos_z = state_ranges[2];
@@ -18,6 +20,7 @@ void	state_init(t_state *state, t_range state_ranges[9])
 	state->eul_x = state_ranges[6];
 	state->eul_y = state_ranges[7];
 	state->eul_z = state_ranges[8];
+	return (STATE_STAT_OK);
 }
 
 bool	state_validate(t_state desired, float currents[9])

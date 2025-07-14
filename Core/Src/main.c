@@ -55,6 +55,8 @@ UART_HandleTypeDef huart2;
 
 t_sara *const sara = &(t_sara){0};
 
+uint32_t stat;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -110,8 +112,9 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  sara_init(sara, &hi2c1, &hadc1, &htim3, &htim1);
-
+  stat = sara_init(sara, &hi2c1, &hadc1, &htim3, &htim1);
+  if (stat != SARA_STAT_OK)
+	  Error_Handler();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,7 +123,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		sara_update(sara);
+		stat = sara_update(sara);
+		if (stat != SARA_STAT_OK)
+			Error_Handler();
 	}
   /* USER CODE END 3 */
 }

@@ -35,33 +35,29 @@
 # define BNO055_GYRO_SCALE_DPS 16.0f
 # define BNO055_GYRO_SCALE_RPS 900.0f
 
-typedef enum e_bno055_err
-{
-    BNO055_OK,
-    BNO055_ERR_I2C,
-    BNO055_ERR_PAGE_TOO_HIGH,
-    BNO055_ERR_SETTING_PAGE,
-    BNO055_ERR_NULL_PTR,
-    BNO055_ERR_AXIS_REMAP,
-    BNO055_ERR_WRONG_CHIP_ID,
+# define BNO055_MAKE_STAT(base_stat, sub_stat) \
+    (uint16_t)( \
+       ( ((uint16_t)((sub_stat) & 0xFF)) << 8 ) \
+     |   ((uint16_t)((base_stat) & 0xFF)) )
 
-}	t_bno055_err;
+typedef enum e_bno055_stat
+{
+    BNO055_STAT_OK,
+    BNO055_STAT_ERR_SELF_PAGE_TOO_HIGH,
+    BNO055_STAT_ERR_SELF_SETTING_PAGE,
+    BNO055_STAT_ERR_SELF_NULL_PTR,
+    BNO055_STAT_ERR_SELF_AXIS_REMAP,
+    BNO055_STAT_ERR_SELF_WRONG_CHIP_ID,
+	BNO055_STAT_ERR_HAL_I2C_TRANSMIT,
+	BNO055_STAT_ERR_HAL_I2C_RECEIVE,
+	BNO055_STAT_ERR_HAL_I2C_WRITE,
+
+}	t_bno055_stat;
 
 typedef enum e_bno055_opr_mode
 {
     BNO055_OPR_MODE_CONFIG,
-    BNO055_OPR_MODE_AO,
-    BNO055_OPR_MODE_MO,
-    BNO055_OPR_MODE_GO,
-    BNO055_OPR_MODE_AM,
-    BNO055_OPR_MODE_AG,
-    BNO055_OPR_MODE_MG,
-    BNO055_OPR_MODE_AMG,
     BNO055_OPR_MODE_IMU,
-    BNO055_OPR_MODE_COMPASS,
-    BNO055_OPR_MODE_M4G,
-    BNO055_OPR_MODE_NDOF_FMC_OFF,
-    BNO055_OPR_MODE_NDOF,
 
 }	t_bno055_opr_mode;
 
@@ -111,10 +107,9 @@ typedef struct s_bno055_vec
 
 typedef struct s_bno055
 {
-    struct t_bno055			*ptr;
-    I2C_HandleTypeDef		*i2c;
+    I2C_HandleTypeDef		*hi2c;
     uint8_t					addr;
-    t_bno055_err			err;
+    t_bno055_stat			stat;
     t_bno055_opr_mode		opr_mode;
     t_bno055_pwr_mode		pwr_mode;
     t_bno055_page			page;
@@ -126,17 +121,16 @@ typedef struct s_bno055
 
 }	t_bno055;
 
-t_bno055_err	bno055_init(t_bno055 *bno055);
-t_bno055_err	bno055_reset(t_bno055 *bno055);
-t_bno055_err	bno055_on(t_bno055 *bno055);
-t_bno055_err	bno055_linear_acc(t_bno055 *bno055, t_bno055_vec *xyz);
-t_bno055_err	bno055_gyro(t_bno055 *bno055, t_bno055_vec *xyz);
-t_bno055_err	bno055_read_regs(t_bno055 bno055, uint8_t addr, uint8_t* buf, uint32_t buf_size);
-t_bno055_err	bno055_write_regs(t_bno055 bno055, uint32_t addr, uint8_t* buf, uint32_t buf_size);
-t_bno055_err	bno055_set_opr_mode(t_bno055* bno055, const t_bno055_opr_mode opr_mode);
-t_bno055_err	bno055_set_pwr_mode(t_bno055 *bno055, t_bno055_pwr_mode pwr_mode);
-t_bno055_err	bno055_set_page(t_bno055* bno055, const t_bno055_page page);
-t_bno055_err	bno055_set_unit(t_bno055* bno055, const t_bno055_gyro_unitsel gyro_unit, const t_bno055_accel_unitsel accel_unit, const t_bno055_eul_unitsel eul_unit);
-char			*bno055_err_str(const t_bno055_err err);
+uint16_t	bno055_init(t_bno055 *bno055, I2C_HandleTypeDef *hi2c);
+uint16_t	bno055_reset(t_bno055 *bno055);
+uint16_t	bno055_on(t_bno055 *bno055);
+uint16_t	bno055_linear_acc(t_bno055 *bno055, t_bno055_vec *xyz);
+uint16_t	bno055_gyro(t_bno055 *bno055, t_bno055_vec *xyz);
+uint16_t	bno055_read_regs(t_bno055 bno055, uint8_t addr, uint8_t* buf, uint32_t buf_size);
+uint16_t	bno055_write_regs(t_bno055 bno055, uint32_t addr, uint8_t* buf, uint32_t buf_size);
+uint16_t	bno055_set_opr_mode(t_bno055* bno055, const t_bno055_opr_mode opr_mode);
+uint16_t	bno055_set_pwr_mode(t_bno055 *bno055, t_bno055_pwr_mode pwr_mode);
+uint16_t	bno055_set_page(t_bno055* bno055, const t_bno055_page page);
+uint16_t	bno055_set_unit(t_bno055* bno055, const t_bno055_gyro_unitsel gyro_unit, const t_bno055_accel_unitsel accel_unit, const t_bno055_eul_unitsel eul_unit);
 
 #endif /* SARA_INC_BNO055_H_ */
